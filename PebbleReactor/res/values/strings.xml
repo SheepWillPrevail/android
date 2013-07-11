@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Pebble Reactor</string>
+    <string name="action_about">About</string>
+    <string name="title_activity_about">About</string>
+    <string name="title_activity_configure">Configure</string>
+    <string name="msg_service_running">The service is running.</string>
+
+</resources>
