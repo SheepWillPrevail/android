@@ -21,24 +21,28 @@ public class MainActivity extends Activity {
 	private List<Feed> _feeds = new ArrayList<Feed>();
 	private PebbleDataReceiver _receiver = new PebbleDataReceiver(APP_UUID) {
 
+		private static final int maxLength = 96;
+		private int _lastTransactionId = 0;
 		private Long _lastFeed;
 
 		@Override
 		public void receiveData(Context context, int transactionId, PebbleDictionary data) {
-			PebbleKit.sendAckToPebble(context, transactionId);
 			Log.d("receiveData", data.toJsonString());
+			Log.d("ff", Integer.toString(transactionId));
+
+			PebbleKit.sendAckToPebble(context, transactionId);
 
 			Long command_id = data.getUnsignedInteger(1090);
 			if (command_id != null) { // hello
 				Integer total = _feeds.size();
-				Integer offset = 0;
-				for (Feed feed : _feeds) {
+				if (total > 16)
+					total = 16; // clamp
+				for (int i = 0; i < total; i++) {
 					PebbleDictionary feed_dict = new PebbleDictionary();
-					feed_dict.addString(1001, substring(feed.getName(), 100));
+					feed_dict.addString(1001, substring(_feeds.get(i).getName(), maxLength));
 					feed_dict.addUint8(1011, total.byteValue());
-					feed_dict.addUint8(1012, offset.byteValue());
+					feed_dict.addUint8(1012, (byte) i);
 					sendData(context, feed_dict);
-					offset++;
 				}
 			}
 
@@ -47,32 +51,44 @@ public class MainActivity extends Activity {
 				Feed feed = _feeds.get(feed_id.intValue());
 				List<FeedItem> items = feed.getItems();
 				Integer total = items.size();
-				Integer offset = 0;
-				for (FeedItem item : items) {
+				if (total > 128)
+					total = 128; // clamp
+				for (int i = 0; i < total; i++) {
 					PebbleDictionary item_dict = new PebbleDictionary();
-					item_dict.addString(1002, substring(item.getTitle(), 100));
+					item_dict.addString(1002, substring(items.get(i).getTitle(), maxLength));
 					item_dict.addUint8(1011, total.byteValue());
-					item_dict.addUint8(1012, offset.byteValue());
+					item_dict.addUint8(1012, (byte) i);
 					sendData(context, item_dict);
-					offset++;
 				}
 
 				_lastFeed = feed_id;
 			}
 
 			Long item_id = data.getUnsignedInteger(1092);
-			if (item_id != null) {
+			if (item_id != null && _lastFeed != null) {
 				Feed feed = _feeds.get(_lastFeed.intValue());
 				FeedItem item = feed.getItems().get(item_id.intValue());
-				PebbleDictionary message_dict = new PebbleDictionary();
-				message_dict.addString(1003, substring(item.getContent(), 100));
-				sendData(context, message_dict);
+				String content = item.getContent();
+				int parts = (int) Math.ceil((double) content.length() / maxLength);
+				if (parts > 10)
+					parts = 1000 / maxLength; // clamp
+				for (int offset = 0; offset < (parts * maxLength); offset += maxLength) {
+					int length = content.length() - offset;
+					if (length > maxLength)
+						length = maxLength;
+					PebbleDictionary message_dict = new PebbleDictionary();
+					message_dict.addString(1003, content.substring(offset, offset + length));
+					message_dict.addUint8(1011, (byte) parts);
+					message_dict.addUint16(1012, (short) offset);
+					sendData(context, message_dict);
+				}
 			}
 		}
 
 		private void sendData(Context context, PebbleDictionary dict) {
 			Log.d("sendData", dict.toJsonString());
-			PebbleKit.sendDataToPebble(context, APP_UUID, dict);
+			// PebbleKit.sendDataToPebble(context, APP_UUID, dict);
+			PebbleKit.sendDataToPebbleWithTransactionId(context, APP_UUID, dict, ++_lastTransactionId % 255);
 		}
 
 	};
