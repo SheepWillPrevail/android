@@ -4,10 +4,10 @@
         android:id="@+id/action_add"
         android:title="Add feed"/>
     <item
-        android:id="@+id/action_about"
-        android:title="About"/>
-    <item
         android:id="@+id/action_app"
         android:title="Send app to Pebble"/>
+    <item
+        android:id="@+id/action_about"
+        android:title="About"/>
 
 </menu>

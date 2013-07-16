@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.PebbleKit.PebbleDataReceiver;
@@ -82,12 +83,11 @@ public class RSSService extends Service {
 
 		PebbleKit.registerReceivedDataHandler(this, _receiver);
 
-		// NotificationCompat.Builder builder = new
-		// NotificationCompat.Builder(this);
-		// builder.setContentTitle(getResources().getString(R.string.app_name));
-		// builder.setContentText(getResources().getString(R.string.msg_service_running));
-		// builder.setSmallIcon(R.drawable.icon);
-		// startForeground(1, builder.build());
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setContentTitle(getResources().getString(R.string.app_name));
+		builder.setContentText(getResources().getString(R.string.msg_service_running));
+		builder.setSmallIcon(R.drawable.notification);
+		startForeground(1, builder.build());
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class RSSService extends Service {
 		_alarmManager.cancel(_alarmIntent);
 		unregisterReceiver(_receiver);
 
-		// stopForeground(true);
+		stopForeground(true);
 	}
 
 	public List<Feed> getFeeds() {
