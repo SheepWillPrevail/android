@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.PebbleKit.PebbleDataReceiver;
@@ -78,9 +79,15 @@ public class RSSService extends Service {
 
 		_alarmIntent = PendingIntent.getBroadcast(this, 0, new Intent(_alarmAction), PendingIntent.FLAG_UPDATE_CURRENT);
 		_alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		_alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, _alarmIntent);
+		_alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HALF_HOUR, _alarmIntent);
 
 		PebbleKit.registerReceivedDataHandler(this, _receiver);
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setContentTitle(getResources().getString(R.string.app_name));
+		builder.setContentText(getResources().getString(R.string.msg_service_running));
+		builder.setSmallIcon(R.drawable.icon);
+		startForeground(1, builder.build());
 	}
 
 	@Override
@@ -92,6 +99,8 @@ public class RSSService extends Service {
 		unregisterReceiver(_alarmReceiver);
 		_alarmManager.cancel(_alarmIntent);
 		unregisterReceiver(_receiver);
+
+		stopForeground(true);
 	}
 
 	public List<Feed> getFeeds() {

@@ -28,6 +28,7 @@ public class MainActivity extends RSSServiceActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		_lvFeeds = (ListView) findViewById(R.id.lvFeeds);
+		startService(new Intent(this, RSSService.class));
 	}
 
 	@Override
