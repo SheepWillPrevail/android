@@ -1,4 +1,4 @@
-package com.grazz.pebblerss;
+package com.grazz.pebblerss.feed;
 
 import android.net.Uri;
 

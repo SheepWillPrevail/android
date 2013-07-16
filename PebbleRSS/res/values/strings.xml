@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Pebble RSS</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main">Feeds</string>
+    <string name="title_activity_feed">Feed</string>
+    <string name="title_activity_about">About</string>
 
 </resources>

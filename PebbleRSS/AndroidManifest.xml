@@ -9,21 +9,45 @@
         android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" /> -->
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.grazz.pebblerss.MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
+            android:label="@string/title_activity_main" >
+            <intent-filter android:label="@string/app_name" >
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.grazz.pebblerss.feed.FeedActivity"
+            android:label="@string/title_activity_feed"
+            android:parentActivityName="com.grazz.pebblerss.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.grazz.pebblerss.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.grazz.pebblerss.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName="com.grazz.pebblerss.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.grazz.pebblerss.MainActivity" />
+        </activity>
+
+        <service
+            android:name="com.grazz.pebblerss.RSSService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
