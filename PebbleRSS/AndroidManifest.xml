@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.grazz.pebblerss"
-    android:versionCode="2"
+    android:versionCode="5"
     android:versionName="1.0" >
 
     <uses-sdk
@@ -10,7 +10,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" /> -->
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.grazz.pebblerss.feed.FeedActivity"
+            android:name="com.grazz.pebblerss.FeedActivity"
             android:label="@string/title_activity_feed"
             android:parentActivityName="com.grazz.pebblerss.MainActivity" >
             <meta-data
@@ -47,6 +47,9 @@
             android:name="com.grazz.pebblerss.RSSService"
             android:enabled="true"
             android:exported="false" >
+            <intent-filter>
+                <action android:name="com.getpebble.action.app.RECEIVE" />
+            </intent-filter>
         </service>
     </application>
 

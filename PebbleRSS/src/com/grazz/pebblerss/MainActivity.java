@@ -1,7 +1,14 @@
 package com.grazz.pebblerss;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,11 +16,11 @@ import android.view.View.OnLongClickListener;
 import android.widget.ListView;
 
 import com.grazz.pebblerss.feed.Feed;
-import com.grazz.pebblerss.feed.FeedActivity;
 import com.grazz.pebblerss.feed.FeedListAdapter;
 
 public class MainActivity extends RSSServiceActivity {
 
+	private static final String PEBBLERSS_PBW = "pebblerss.pbw";
 	private ListView _lvFeeds;
 	private FeedListAdapter _adapter;
 
@@ -48,6 +55,9 @@ public class MainActivity extends RSSServiceActivity {
 		case R.id.action_about:
 			startActivity(new Intent(this, AboutActivity.class));
 			return true;
+		case R.id.action_app:
+			sendApp();
+			return true;
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}
@@ -66,5 +76,29 @@ public class MainActivity extends RSSServiceActivity {
 		};
 		_adapter = new FeedListAdapter(getRSSService().getFeeds(), listener);
 		_lvFeeds.setAdapter(_adapter);
+	}
+
+	private void sendApp() {
+		try {
+			InputStream input = getAssets().open(PEBBLERSS_PBW);
+			File file = new File(Environment.getExternalStorageDirectory(), PEBBLERSS_PBW);
+			file.setReadable(true, false);
+			OutputStream output = new FileOutputStream(file);
+			try {
+				byte[] buffer = new byte[1024];
+				int read;
+				while ((read = input.read(buffer)) != -1)
+					output.write(buffer, 0, read);
+				output.flush();
+			} finally {
+				output.close();
+			}
+			input.close();
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setDataAndType(Uri.fromFile(file), "application/octet-stream");
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

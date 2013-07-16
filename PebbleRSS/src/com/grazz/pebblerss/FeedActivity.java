@@ -1,4 +1,4 @@
-package com.grazz.pebblerss.feed;
+package com.grazz.pebblerss;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import android.webkit.URLUtil;
 import android.widget.TextView;
 
 import com.grazz.pebblerss.R;
-import com.grazz.pebblerss.RSSServiceActivity;
+import com.grazz.pebblerss.feed.Feed;
 
 public class FeedActivity extends RSSServiceActivity {
 
@@ -80,6 +80,7 @@ public class FeedActivity extends RSSServiceActivity {
 				return false;
 			if (_feedAction == Feed.FEED_ADD) {
 				Feed feed = getRSSService().addFeed(Uri.parse(_url.getText().toString()));
+				feed.doParse();
 				feed.setName(_name.getText().toString());
 			} else {
 				Feed feed = getRSSService().getFeeds().get(_feedId);
