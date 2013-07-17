@@ -30,7 +30,7 @@
     </EditText>
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvAndroidRSS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/etURL"
@@ -43,9 +43,9 @@
         android:id="@+id/etFeedName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignLeft="@+id/tvAndroidRSS"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@+id/tvAndroidRSS"
         android:ems="10" />
 
 </RelativeLayout>

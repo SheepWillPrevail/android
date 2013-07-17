@@ -8,12 +8,12 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.webkit.URLUtil;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.grazz.pebblerss.R;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.grazz.pebblerss.feed.Feed;
 
 public class FeedActivity extends RSSServiceActivity {
@@ -22,6 +22,7 @@ public class FeedActivity extends RSSServiceActivity {
 	private TextView _name;
 	private int _feedAction;
 	private int _feedId;
+	private Boolean _isValid = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +37,14 @@ public class FeedActivity extends RSSServiceActivity {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				String url = s.toString();
-				if (URLUtil.isValidUrl(url)) {
+				if (url != null && URLUtil.isValidUrl(url)) {
 					Feed feed = new Feed(Uri.parse(url));
 					feed.doParse();
-					if (feed.getName() != null) {
+					_isValid = feed.isParsed() && (feed.getItems().size() > 0);
+					if (feed.getName() != null)
 						_name.setText(feed.getName());
-					}
 				}
+
 			}
 
 			@Override
@@ -67,17 +69,19 @@ public class FeedActivity extends RSSServiceActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.feed, menu);
-		return true;
+		getSupportMenuInflater().inflate(R.menu.feed, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_save:
-			if (!URLUtil.isValidUrl(_url.getText().toString()))
+			if (!_isValid) {
+				Toast toast = Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG);
+				toast.show();
 				return false;
+			}
 			if (_feedAction == Feed.FEED_ADD) {
 				Feed feed = getRSSService().addFeed(Uri.parse(_url.getText().toString()));
 				feed.doParse();

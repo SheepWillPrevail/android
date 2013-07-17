@@ -1,33 +1,47 @@
 package com.grazz.pebblerss;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-public class AboutActivity extends Activity {
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
+public class AboutActivity extends SherlockActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_about);
-		// Show the Up button in the action bar.
 		setupActionBar();
 
-		ImageView image = (ImageView) findViewById(R.id.imageView1);
-		image.setOnClickListener(new OnClickListener() {
-
+		ImageView wikiImage = (ImageView) findViewById(R.id.imageView1);
+		wikiImage.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://donate.wikimedia.org")));
+			}
+		});
+		TextView textRSS = (TextView) findViewById(R.id.tvAndroidRSS);
+		textRSS.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ahorn/android-rss")));
+			}
+		});
+		TextView textSherlock = (TextView) findViewById(R.id.tvActionBarSherlock);
+		textSherlock.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://actionbarsherlock.com/")));
 			}
 		});
 	}

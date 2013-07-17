@@ -1,6 +1,5 @@
 package com.grazz.pebblerss;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,9 +7,10 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.grazz.pebblerss.RSSService.RSSServiceBinder;
 
-public abstract class RSSServiceActivity extends Activity {
+public abstract class RSSServiceActivity extends SherlockActivity {
 
 	private RSSService _rssService;
 

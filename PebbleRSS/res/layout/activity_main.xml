@@ -16,4 +16,13 @@
         android:layout_alignParentTop="true" >
     </ListView>
 
+    <TextView
+        android:id="@+id/lvFeedsEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="No feeds founds"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>

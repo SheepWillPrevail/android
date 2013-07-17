@@ -84,6 +84,7 @@ public class RSSService extends Service {
 		PebbleKit.registerReceivedDataHandler(this, _receiver);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0));
 		builder.setContentTitle(getResources().getString(R.string.app_name));
 		builder.setContentText(getResources().getString(R.string.msg_service_running));
 		builder.setSmallIcon(R.drawable.notification);
@@ -94,7 +95,7 @@ public class RSSService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 
-		writeConfig();
+		// writeConfig();
 
 		unregisterReceiver(_alarmReceiver);
 		_alarmManager.cancel(_alarmIntent);
@@ -140,7 +141,7 @@ public class RSSService extends Service {
 		}
 	}
 
-	private void writeConfig() {
+	public void writeConfig() {
 		File feedFile = new File(getFilesDir(), FEED_CONFIG_XML);
 		if (feedFile.exists())
 			feedFile.delete();
