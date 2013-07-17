@@ -9,7 +9,7 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.webkit.URLUtil;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -18,11 +18,12 @@ import com.grazz.pebblerss.feed.Feed;
 
 public class FeedActivity extends RSSServiceActivity {
 
-	private TextView _url;
-	private TextView _name;
+	private EditText _url;
+	private EditText _name;
+	private EditText _interval;
 	private int _feedAction;
 	private int _feedId;
-	private Boolean _isValid = false;
+	private Boolean _isValidFeed = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,31 +31,9 @@ public class FeedActivity extends RSSServiceActivity {
 		setContentView(R.layout.activity_feed);
 		setupActionBar();
 
-		_url = (TextView) findViewById(R.id.etURL);
-		_name = (TextView) findViewById(R.id.etFeedName);
-
-		_url.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				String url = s.toString();
-				if (url != null && URLUtil.isValidUrl(url)) {
-					Feed feed = new Feed(Uri.parse(url));
-					feed.doParse();
-					_isValid = feed.isParsed() && (feed.getItems().size() > 0);
-					if (feed.getName() != null)
-						_name.setText(feed.getName());
-				}
-
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-			}
-		});
+		_url = (EditText) findViewById(R.id.etURL);
+		_name = (EditText) findViewById(R.id.etFeedName);
+		_interval = (EditText) findViewById(R.id.etInterval);
 	}
 
 	/**
@@ -70,26 +49,33 @@ public class FeedActivity extends RSSServiceActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.feed, menu);
-		return super.onCreateOptionsMenu(menu);
+		return true;
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
 		case R.id.action_save:
-			if (!_isValid) {
+			String interval = _interval.getText().toString();
+			if (!_isValidFeed || interval.length() == 0) {
 				Toast toast = Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG);
 				toast.show();
 				return false;
 			}
+			Integer scaledinterval = Integer.valueOf(interval) * 1000;
 			if (_feedAction == Feed.FEED_ADD) {
 				Feed feed = getRSSService().addFeed(Uri.parse(_url.getText().toString()));
 				feed.doParse();
 				feed.setName(_name.getText().toString());
+				feed.setInterval(scaledinterval);
 			} else {
 				Feed feed = getRSSService().getFeeds().get(_feedId);
-				feed.setName(_name.getText().toString());
 				feed.setLink(Uri.parse(_url.getText().toString()));
+				feed.setName(_name.getText().toString());
+				feed.setInterval(scaledinterval);
 			}
 			finish();
 			return true;
@@ -99,17 +85,7 @@ public class FeedActivity extends RSSServiceActivity {
 			finish();
 			return true;
 		}
-		return super.onMenuItemSelected(featureId, item);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
+		return false;
 	}
 
 	@Override
@@ -117,13 +93,41 @@ public class FeedActivity extends RSSServiceActivity {
 		Intent intent = getIntent();
 		_feedAction = intent.getExtras().getInt(Feed.FEED_ACTION);
 		switch (_feedAction) {
+		case Feed.FEED_ADD:
+			_interval.setText("30");
+			break;
 		case Feed.FEED_EDIT:
 			_feedId = intent.getExtras().getInt(Feed.FEED_ID);
 			Feed feed = getRSSService().getFeeds().get(_feedId);
 			_url.setText(feed.getLink().toString());
 			_name.setText(feed.getName());
+			_interval.setText(String.valueOf(feed.getInterval() / 1000));
+			_isValidFeed = true;
 			break;
 		}
+
+		_url.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				String url = s.toString();
+				if (url != null && URLUtil.isValidUrl(url)) {
+					Feed feed = new Feed(Uri.parse(url));
+					feed.doParse();
+					_isValidFeed = feed.isParsed() && (feed.getItems().size() > 0);
+					if (feed.getName() != null)
+						_name.setText(feed.getName());
+				}
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
 	}
 
 }

@@ -24,7 +24,8 @@
         android:layout_alignLeft="@+id/textView1"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/textView1"
-        android:ems="10" >
+        android:ems="10"
+        android:inputType="textUri" >
 
         <requestFocus />
     </EditText>
@@ -47,5 +48,35 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/tvAndroidRSS"
         android:ems="10" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/etFeedName"
+        android:layout_below="@+id/etFeedName"
+        android:layout_marginTop="16dp"
+        android:text="Refresh interval"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/etInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignRight="@+id/tvAndroidRSS"
+        android:layout_below="@+id/textView2"
+        android:ems="10"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/etInterval"
+        android:layout_alignBottom="@+id/etInterval"
+        android:layout_toRightOf="@+id/etInterval"
+        android:text="minutes"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

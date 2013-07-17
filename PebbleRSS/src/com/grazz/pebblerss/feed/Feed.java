@@ -3,6 +3,7 @@ package com.grazz.pebblerss.feed;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jsoup.Jsoup;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
@@ -16,15 +17,19 @@ public class Feed implements Runnable {
 	public static final String FEED_ACTION = "feed_action";
 	public static final String FEED_ID = "feed_id";
 
-	private Thread _parseThread;
-	private List<FeedItem> _items = new ArrayList<FeedItem>();
-	private Boolean _isParsed;
 	private Uri _link;
 	private String _name;
+	private int _refreshInterval;
 
-	public Feed(Uri link, String name) {
+	private Thread _parseThread;
+	private List<FeedItem> _items = new ArrayList<FeedItem>();
+	private Boolean _isParsed = false;
+	private Long _nextUpdate = 0L;
+
+	public Feed(Uri link, String name, int refreshInterval) {
 		_link = link;
 		_name = name;
+		_refreshInterval = refreshInterval;
 	}
 
 	public Feed(Uri link) {
@@ -42,12 +47,20 @@ public class Feed implements Runnable {
 		}
 	}
 
+	public int getInterval() {
+		return _refreshInterval;
+	}
+
 	public String getName() {
 		return _name;
 	}
 
 	public Uri getLink() {
 		return _link;
+	}
+
+	public void setInterval(int interval) {
+		_refreshInterval = interval;
 	}
 
 	public void setName(String name) {
@@ -58,6 +71,10 @@ public class Feed implements Runnable {
 		_link = link;
 	}
 
+	public Long getNextUpdateTime() {
+		return _nextUpdate;
+	}
+
 	public Boolean isParsed() {
 		return _isParsed;
 	}
@@ -66,8 +83,10 @@ public class Feed implements Runnable {
 		return _items;
 	}
 
-	private synchronized void setIsParsed(Boolean value) {
-		_isParsed = true;
+	private synchronized void setIsParsed(Boolean isParsed) {
+		_isParsed = isParsed;
+		if (_isParsed)
+			_nextUpdate = System.currentTimeMillis() + _refreshInterval;
 	}
 
 	@Override
@@ -78,8 +97,10 @@ public class Feed implements Runnable {
 			if (_name == null)
 				_name = feed.getTitle();
 			_items.clear();
-			for (RSSItem item : feed.getItems())
-				_items.add(new FeedItem(item.getTitle(), item.getLink(), item.getDescription()));
+			for (RSSItem item : feed.getItems()) {
+				String description = item.getDescription();
+				_items.add(new FeedItem(item.getTitle(), item.getLink(), Jsoup.parse(description).text()));
+			}
 			setIsParsed(true);
 		} catch (Exception e) {
 		} finally {

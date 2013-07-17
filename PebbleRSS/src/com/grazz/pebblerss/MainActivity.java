@@ -14,12 +14,12 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.widget.ListView;
 
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.grazz.pebblerss.feed.Feed;
 import com.grazz.pebblerss.feed.FeedListAdapter;
 
@@ -74,11 +74,11 @@ public class MainActivity extends RSSServiceActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.main, menu);
-		return super.onCreateOptionsMenu(menu);
+		return true;
 	}
 
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
 			Intent intent = new Intent(this, FeedActivity.class);
@@ -92,7 +92,7 @@ public class MainActivity extends RSSServiceActivity {
 			sendApp();
 			return true;
 		}
-		return super.onMenuItemSelected(featureId, item);
+		return false;
 	}
 
 	@Override

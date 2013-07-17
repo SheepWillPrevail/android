@@ -18,19 +18,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 
-import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.PebbleKit.PebbleDataReceiver;
 import com.grazz.pebblerss.feed.Feed;
 
@@ -44,19 +37,7 @@ public class RSSService extends Service {
 		}
 	}
 
-	public class AlarmReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			for (Feed feed : _feeds)
-				feed.doParse();
-		}
-	}
-
 	private RSSServiceBinder _binder = new RSSServiceBinder();
-	private AlarmReceiver _alarmReceiver = new AlarmReceiver();
-	private String _alarmAction = AlarmReceiver.class.getName();
-	private PendingIntent _alarmIntent;
-	private AlarmManager _alarmManager;
 	private PebbleDataReceiver _receiver;
 	private List<Feed> _feeds = new ArrayList<Feed>();
 
@@ -72,36 +53,14 @@ public class RSSService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
 		readConfig();
-
-		registerReceiver(_alarmReceiver, new IntentFilter(_alarmAction));
-
-		_alarmIntent = PendingIntent.getBroadcast(this, 0, new Intent(_alarmAction), PendingIntent.FLAG_UPDATE_CURRENT);
-		_alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		_alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HALF_HOUR, _alarmIntent);
-
-		PebbleKit.registerReceivedDataHandler(this, _receiver);
-
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-		builder.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0));
-		builder.setContentTitle(getResources().getString(R.string.app_name));
-		builder.setContentText(getResources().getString(R.string.msg_service_running));
-		builder.setSmallIcon(R.drawable.notification);
-		startForeground(1, builder.build());
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-
-		// writeConfig();
-
-		unregisterReceiver(_alarmReceiver);
-		_alarmManager.cancel(_alarmIntent);
-		unregisterReceiver(_receiver);
-
-		stopForeground(true);
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent != null && intent.hasExtra(PassiveRSSDataReceiver.DICTIONARY))
+			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.DICTIONARY));
+		return super.onStartCommand(intent, flags, startId);
 	}
 
 	public List<Feed> getFeeds() {
@@ -131,7 +90,13 @@ public class RSSService extends Service {
 					Node node = nodeList.item(i);
 					String link = node.getAttributes().getNamedItem("link").getNodeValue();
 					String name = node.getAttributes().getNamedItem("name").getNodeValue();
-					Feed feed = new Feed(Uri.parse(link), name);
+
+					String interval = "30000";
+					Node intervalNode = node.getAttributes().getNamedItem("interval");
+					if (intervalNode != null)
+						interval = intervalNode.getNodeValue();
+
+					Feed feed = new Feed(Uri.parse(link), name, Integer.valueOf(interval));
 					feed.doParse();
 					_feeds.add(feed);
 				}
@@ -154,6 +119,7 @@ public class RSSService extends Service {
 				Element feedNode = document.createElement("feed");
 				feedNode.setAttribute("link", feed.getLink().toString());
 				feedNode.setAttribute("name", feed.getName());
+				feedNode.setAttribute("interval", String.valueOf(feed.getInterval()));
 				documentElement.appendChild(feedNode);
 			}
 			document.appendChild(documentElement);
@@ -165,5 +131,4 @@ public class RSSService extends Service {
 			e.printStackTrace();
 		}
 	}
-
 }

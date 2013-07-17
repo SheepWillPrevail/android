@@ -3,7 +3,6 @@ package com.grazz.pebblerss;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,6 @@ import com.grazz.pebblerss.feed.FeedItem;
 
 public class RSSDataReceiver extends PebbleDataReceiver {
 
-	private static final UUID APP_UUID = UUID.fromString("1941e614-9163-49bd-ba01-6d7fa71eedac");
 	private static final int maxLength = 96;
 
 	private Queue<PebbleDictionary> _msgQueue = new ArrayDeque<PebbleDictionary>();
@@ -26,7 +24,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	private Long _lastFeed;
 
 	protected RSSDataReceiver(RSSService service) {
-		super(APP_UUID);
+		super(StaticValues.APP_UUID);
 		_service = service;
 	}
 
@@ -66,6 +64,10 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		Long feed_id = data.getUnsignedInteger(1091);
 		if (feed_id != null) {
 			Feed feed = _service.getFeeds().get(feed_id.intValue());
+
+			if (System.currentTimeMillis() > feed.getNextUpdateTime())
+				feed.doParse();
+
 			List<FeedItem> items = feed.getItems();
 			Integer total = items.size();
 			if (total > 128)
@@ -123,7 +125,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		if (!_msgQueue.isEmpty()) {
 			PebbleDictionary dictionary = _msgQueue.remove();
 			Log.d("sendData", dictionary.toJsonString());
-			PebbleKit.sendDataToPebbleWithTransactionId(context, APP_UUID, dictionary, _transactionId++ % 255);
+			PebbleKit.sendDataToPebbleWithTransactionId(context, StaticValues.APP_UUID, dictionary, _transactionId++ % 255);
 		}
 	}
 

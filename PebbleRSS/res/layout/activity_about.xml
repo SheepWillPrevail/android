@@ -63,5 +63,15 @@
         android:layout_marginTop="40dp"
         android:text="android-rss"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+        <TextView
+        android:id="@+id/tvJSoup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:text="jsoup"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>
