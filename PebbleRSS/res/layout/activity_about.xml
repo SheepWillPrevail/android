@@ -41,7 +41,7 @@
         android:layout_below="@+id/imageView1"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:text="Uses the following libraries:"
+        android:text="This program uses the following libraries:"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView

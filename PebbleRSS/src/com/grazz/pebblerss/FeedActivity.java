@@ -65,7 +65,7 @@ public class FeedActivity extends RSSServiceActivity {
 				toast.show();
 				return false;
 			}
-			Integer scaledinterval = Integer.valueOf(interval) * 1000;
+			Integer scaledinterval = Integer.valueOf(interval);
 			if (_feedAction == Feed.FEED_ADD) {
 				Feed feed = getRSSService().addFeed(Uri.parse(_url.getText().toString()));
 				feed.doParse();
@@ -101,7 +101,7 @@ public class FeedActivity extends RSSServiceActivity {
 			Feed feed = getRSSService().getFeeds().get(_feedId);
 			_url.setText(feed.getLink().toString());
 			_name.setText(feed.getName());
-			_interval.setText(String.valueOf(feed.getInterval() / 1000));
+			_interval.setText(String.valueOf(feed.getInterval()));
 			_isValidFeed = true;
 			break;
 		}

@@ -86,7 +86,7 @@ public class Feed implements Runnable {
 	private synchronized void setIsParsed(Boolean isParsed) {
 		_isParsed = isParsed;
 		if (_isParsed)
-			_nextUpdate = System.currentTimeMillis() + _refreshInterval;
+			_nextUpdate = System.currentTimeMillis() + (60 * 1000 * _refreshInterval);
 	}
 
 	@Override

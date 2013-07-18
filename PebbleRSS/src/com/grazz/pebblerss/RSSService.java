@@ -91,7 +91,7 @@ public class RSSService extends Service {
 					String link = node.getAttributes().getNamedItem("link").getNodeValue();
 					String name = node.getAttributes().getNamedItem("name").getNodeValue();
 
-					String interval = "30000";
+					String interval = "30";
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
