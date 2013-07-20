@@ -21,10 +21,9 @@ public class Feed implements Runnable {
 	private String _name;
 	private int _refreshInterval;
 
-	private Thread _parseThread;
-	private List<FeedItem> _items = new ArrayList<FeedItem>();
-	private Boolean _isParsed = false;
 	private Long _nextUpdate = 0L;
+	private Boolean _isParsed = false;
+	private List<FeedItem> _items = new ArrayList<FeedItem>();
 
 	public Feed(Uri link, String name, int refreshInterval) {
 		_link = link;
@@ -38,10 +37,10 @@ public class Feed implements Runnable {
 
 	public void doParse() {
 		setIsParsed(false);
-		_parseThread = new Thread(this);
-		_parseThread.start();
+		Thread parseThread = new Thread(this);
+		parseThread.start();
 		try {
-			_parseThread.join();
+			parseThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -71,12 +70,12 @@ public class Feed implements Runnable {
 		_link = link;
 	}
 
-	public Long getNextUpdateTime() {
-		return _nextUpdate;
-	}
-
 	public Boolean isParsed() {
 		return _isParsed;
+	}
+
+	public Boolean isStale() {
+		return System.currentTimeMillis() > _nextUpdate;
 	}
 
 	public List<FeedItem> getItems() {
@@ -96,11 +95,11 @@ public class Feed implements Runnable {
 			RSSFeed feed = reader.load(_link.toString());
 			if (_name == null)
 				_name = feed.getTitle();
+
 			_items.clear();
-			for (RSSItem item : feed.getItems()) {
-				String description = item.getDescription();
-				_items.add(new FeedItem(item.getTitle(), item.getLink(), Jsoup.parse(description).text()));
-			}
+			for (RSSItem item : feed.getItems())
+				_items.add(new FeedItem(item.getTitle(), item.getLink(), Jsoup.parse(item.getDescription()).text()));
+
 			setIsParsed(true);
 		} catch (Exception e) {
 		} finally {

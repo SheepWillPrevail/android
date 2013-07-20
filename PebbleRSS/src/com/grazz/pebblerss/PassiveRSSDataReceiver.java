@@ -10,7 +10,7 @@ import android.content.Intent;
 
 public class PassiveRSSDataReceiver extends BroadcastReceiver {
 
-	public static final String DICTIONARY = "dictionary";
+	public static final String INTENT = "intent";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -19,7 +19,7 @@ public class PassiveRSSDataReceiver extends BroadcastReceiver {
 			return;
 
 		Intent service = new Intent(context, RSSService.class);
-		service.putExtra(DICTIONARY, intent);
+		service.putExtra(INTENT, intent);
 		context.startService(service);
 	}
 

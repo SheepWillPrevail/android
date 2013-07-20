@@ -11,5 +11,6 @@
     <string name="button_positive">Yes</string>
     <string name="button_negative">No</string>
     <string name="error_feed_invalid">This feed appears to be invalid</string>
+    <string name="error_deploy_watchapp">Unable to write to external memory</string>
 
 </resources>

@@ -1,7 +1,5 @@
 package com.grazz.pebblerss.feed;
 
-import java.util.List;
-
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -13,17 +11,17 @@ import com.grazz.pebblerss.R;
 
 public class FeedListAdapter implements ListAdapter {
 
-	private List<Feed> _feeds;
+	private FeedManager _manager;
 	private OnLongClickListener _listener;
 
-	public FeedListAdapter(List<Feed> feeds, OnLongClickListener listener) {
-		_feeds = feeds;
+	public FeedListAdapter(FeedManager manager, OnLongClickListener listener) {
+		_manager = manager;
 		_listener = listener;
 	}
 
 	@Override
 	public int getCount() {
-		return _feeds.size();
+		return _manager.getFeeds().size();
 	}
 
 	@Override
@@ -45,7 +43,7 @@ public class FeedListAdapter implements ListAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			convertView = View.inflate(parent.getContext(), R.layout.cell_feed, null);
-			Feed feed = _feeds.get(position);
+			Feed feed = _manager.getFeed(position);
 			TextView tvFeedName = (TextView) convertView.findViewById(R.id.tvFeedName);
 			tvFeedName.setText(feed.getName());
 			TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
@@ -68,7 +66,7 @@ public class FeedListAdapter implements ListAdapter {
 
 	@Override
 	public boolean isEmpty() {
-		return _feeds.isEmpty();
+		return _manager.getFeeds().isEmpty();
 	}
 
 	@Override

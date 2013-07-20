@@ -61,18 +61,17 @@ public class FeedActivity extends RSSServiceActivity {
 		case R.id.action_save:
 			String interval = _interval.getText().toString();
 			if (!_isValidFeed || interval.length() == 0) {
-				Toast toast = Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG);
-				toast.show();
+				Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG).show();
 				return false;
 			}
 			Integer scaledinterval = Integer.valueOf(interval);
 			if (_feedAction == Feed.FEED_ADD) {
-				Feed feed = getRSSService().addFeed(Uri.parse(_url.getText().toString()));
+				Feed feed = getRSSService().getFeedManager().addFeed(Uri.parse(_url.getText().toString()));
 				feed.doParse();
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
 			} else {
-				Feed feed = getRSSService().getFeeds().get(_feedId);
+				Feed feed = getRSSService().getFeedManager().getFeed(_feedId);
 				feed.setLink(Uri.parse(_url.getText().toString()));
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
@@ -81,7 +80,7 @@ public class FeedActivity extends RSSServiceActivity {
 			return true;
 		case R.id.action_delete:
 			if (_feedAction == Feed.FEED_EDIT)
-				getRSSService().removeFeed(_feedId);
+				getRSSService().getFeedManager().removeFeed(_feedId);
 			finish();
 			return true;
 		}
@@ -98,7 +97,7 @@ public class FeedActivity extends RSSServiceActivity {
 			break;
 		case Feed.FEED_EDIT:
 			_feedId = intent.getExtras().getInt(Feed.FEED_ID);
-			Feed feed = getRSSService().getFeeds().get(_feedId);
+			Feed feed = getRSSService().getFeedManager().getFeed(_feedId);
 			_url.setText(feed.getLink().toString());
 			_name.setText(feed.getName());
 			_interval.setText(String.valueOf(feed.getInterval()));
@@ -117,7 +116,6 @@ public class FeedActivity extends RSSServiceActivity {
 					if (feed.getName() != null)
 						_name.setText(feed.getName());
 				}
-
 			}
 
 			@Override
