@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.grazz.pebblerss"
-    android:versionCode="13"
+    android:versionCode="14"
     android:versionName="1.2" >
 
     <uses-sdk
@@ -46,7 +46,7 @@
         <service
             android:name="com.grazz.pebblerss.RSSService"
             android:enabled="true"
-            android:exported="false" >
+            android:exported="true" >
         </service>
 
         <receiver
@@ -55,6 +55,14 @@
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.getpebble.action.app.RECEIVE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.grazz.pebblerss.CanvasRSSPlugin"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.pennas.pebblecanvas.plugin.REQUEST_DEFINITIONS" />
+                <action android:name="com.pennas.pebblecanvas.plugin.REQUEST_UPDATE" />
             </intent-filter>
         </receiver>
     </application>

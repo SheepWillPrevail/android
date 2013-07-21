@@ -1,5 +1,8 @@
 package com.grazz.pebblerss;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +13,8 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.PebbleKit.PebbleAckReceiver;
 import com.getpebble.android.kit.PebbleKit.PebbleNackReceiver;
 import com.grazz.pebblerss.feed.FeedManager;
+import com.grazz.pebblerss.feed.FeedSerializer;
+import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class RSSService extends Service {
 
@@ -23,9 +28,9 @@ public class RSSService extends Service {
 
 	private RSSServiceBinder _binder = new RSSServiceBinder();
 	private RSSDataReceiver _receiver;
-
 	private PebbleAckReceiver _ackReceiver;
 	private PebbleNackReceiver _nackReceiver;
+	private Timer _timer;
 
 	public RSSService() {
 		_receiver = new RSSDataReceiver(this);
@@ -61,17 +66,36 @@ public class RSSService extends Service {
 		super.onDestroy();
 		unregisterReceiver(_ackReceiver);
 		unregisterReceiver(_nackReceiver);
+		if (_timer != null)
+			_timer.cancel();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent != null && intent.hasExtra(PassiveRSSDataReceiver.INTENT))
 			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.INTENT));
+		if (intent != null && intent.hasExtra(CanvasRSSPlugin.START_FEED_POLLING)) {
+			if (_timer == null) {
+				_timer = new Timer(true);
+				_timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						if (_feedManager.hasStaleFeeds(true))
+							writeFeedsAndNotifyCanvas();
+					}
+				}, 0, 60 * 1000);
+			}
+		}
 		return super.onStartCommand(intent, flags, startId);
 	}
 
 	public FeedManager getFeedManager() {
 		return _feedManager;
+	}
+
+	private void writeFeedsAndNotifyCanvas() {
+		FeedSerializer.serialize(this, _feedManager);
+		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, this);
 	}
 
 }

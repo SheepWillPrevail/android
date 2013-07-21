@@ -2,7 +2,6 @@ package com.grazz.pebblerss.feed;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,13 +24,13 @@ public class FeedManager {
 
 	private static final String FEED_CONFIG_XML = "feed_config.xml";
 
-	private List<Feed> _feeds = new ArrayList<Feed>();
+	private ArrayList<Feed> _feeds = new ArrayList<Feed>();
 
 	public Feed getFeed(int id) {
 		return _feeds.get(id);
 	}
 
-	public List<Feed> getFeeds() {
+	public ArrayList<Feed> getFeeds() {
 		return _feeds;
 	}
 
@@ -43,6 +42,16 @@ public class FeedManager {
 
 	public void removeFeed(int id) {
 		_feeds.remove(id);
+	}
+	
+	public Boolean hasStaleFeeds(Boolean parseIfStale) {
+		Boolean wasStale = false;
+		for (Feed feed: _feeds)
+			if (feed.isStale()) {
+				if (parseIfStale) feed.doParse();
+				wasStale = true;
+			}
+		return wasStale;				
 	}
 
 	public void readConfig(Context context) {
@@ -63,7 +72,6 @@ public class FeedManager {
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-
 					_feeds.add(new Feed(Uri.parse(link), name, Integer.valueOf(interval)));
 				}
 			} catch (Exception e) {

@@ -20,7 +20,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 
 	private RSSService _service;
 	private ArrayDeque<PebbleDictionary> _msgQueue = new ArrayDeque<PebbleDictionary>();
-	private SparseArray<PebbleDictionary> _msgSentQueue = new SparseArray<PebbleDictionary>();
+	private SparseArray<PebbleDictionary> _msgSent = new SparseArray<PebbleDictionary>();
 	private int _transactionId = 0;
 	private Long _lastFeed;
 	private FeedCursor _feedCursor;
@@ -46,7 +46,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		if (command_id != null) {
 
 			if (command_id.intValue() == 0) { // hello
-				_msgSentQueue.clear();
+				_msgSent.clear();
 				Integer total = _service.getFeedManager().getFeeds().size();
 				if (total > 32)
 					total = 32; // clamp
@@ -124,13 +124,12 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	}
 
 	public void ack(int transactionId) {
-		_msgSentQueue.remove(transactionId);
+		_msgSent.remove(transactionId);
 	}
 
 	public void nack(Context context, int transactionId) {
-		PebbleDictionary dictionary = _msgSentQueue.get(transactionId);
+		PebbleDictionary dictionary = _msgSent.get(transactionId);
 		if (dictionary != null) {
-			ack(transactionId);
 			_msgQueue.push(dictionary);
 			sendData(context);
 		}
@@ -146,7 +145,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			PebbleDictionary dictionary = _msgQueue.remove();
 			Log.d("sendData", dictionary.toJsonString());
 			int transactionId = _transactionId++ % 255;
-			_msgSentQueue.put(transactionId, dictionary);
+			_msgSent.put(transactionId, dictionary);
 			PebbleKit.sendDataToPebbleWithTransactionId(context, StaticValues.APP_UUID, dictionary, transactionId);
 		}
 	}
