@@ -27,7 +27,7 @@
         android:text="Like this program? Please donate to a charity of your choice. My suggestion:" />
 
     <ImageView
-        android:id="@+id/imageView1"
+        android:id="@+id/ivWikimedia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvDonate"
@@ -35,10 +35,10 @@
         android:src="@drawable/wikimedia" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/tvLibs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView1"
+        android:layout_below="@+id/ivWikimedia"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="This program uses the following libraries:"
@@ -48,7 +48,7 @@
         android:id="@+id/tvActionBarSherlock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/tvLibs"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:text="ActionBarSherlock"
@@ -58,7 +58,7 @@
         android:id="@+id/tvAndroidRSS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/tvLibs"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="android-rss"
@@ -68,7 +68,7 @@
         android:id="@+id/tvJSoup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_below="@+id/tvLibs"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="60dp"
         android:text="jsoup"

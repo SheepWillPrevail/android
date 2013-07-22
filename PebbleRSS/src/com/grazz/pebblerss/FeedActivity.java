@@ -1,7 +1,13 @@
 package com.grazz.pebblerss;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +21,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.grazz.pebblerss.feed.Feed;
+import com.grazz.pebblerss.feed.FeedManager;
+import com.grazz.pebblerss.feed.FeedProbe;
 
 public class FeedActivity extends RSSServiceActivity {
 
@@ -34,6 +42,31 @@ public class FeedActivity extends RSSServiceActivity {
 		_url = (EditText) findViewById(R.id.etURL);
 		_name = (EditText) findViewById(R.id.etFeedName);
 		_interval = (EditText) findViewById(R.id.etInterval);
+
+		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		final Resources resources = getResources();
+
+		Boolean seenWarning = pref.getBoolean(StaticValues.PREFERENCES_VALUE_SEEN_DATA_WARNING, false);
+		if (!seenWarning) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(resources.getString(R.string.data_warning_title));
+			builder.setMessage(resources.getString(R.string.data_warning_message));
+			builder.setPositiveButton(resources.getString(R.string.button_agree), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Editor editor = pref.edit();
+					editor.putBoolean(StaticValues.PREFERENCES_VALUE_SEEN_DATA_WARNING, true);
+					editor.commit();
+				}
+			});
+			builder.setNegativeButton(resources.getString(R.string.button_disagree), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+			builder.create().show();
+		}
 	}
 
 	/**
@@ -54,6 +87,7 @@ public class FeedActivity extends RSSServiceActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		FeedManager feedManager = getRSSService().getFeedManager();
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			NavUtils.navigateUpFromSameTask(this);
@@ -66,12 +100,11 @@ public class FeedActivity extends RSSServiceActivity {
 			}
 			Integer scaledinterval = Integer.valueOf(interval);
 			if (_feedAction == Feed.FEED_ADD) {
-				Feed feed = getRSSService().getFeedManager().addFeed(Uri.parse(_url.getText().toString()));
-				feed.doParse();
+				Feed feed = feedManager.addFeed(Uri.parse(_url.getText().toString()));
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
 			} else {
-				Feed feed = getRSSService().getFeedManager().getFeed(_feedId);
+				Feed feed = feedManager.getFeed(_feedId);
 				feed.setLink(Uri.parse(_url.getText().toString()));
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
@@ -80,7 +113,7 @@ public class FeedActivity extends RSSServiceActivity {
 			return true;
 		case R.id.action_delete:
 			if (_feedAction == Feed.FEED_EDIT)
-				getRSSService().getFeedManager().removeFeed(_feedId);
+				feedManager.removeFeed(_feedId);
 			finish();
 			return true;
 		}
@@ -108,14 +141,24 @@ public class FeedActivity extends RSSServiceActivity {
 		_url.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				String url = s.toString();
+				final String url = s.toString();
 				if (url != null && URLUtil.isValidUrl(url)) {
-					Feed feed = new Feed(Uri.parse(url));
-					feed.doParse();
-					_isValidFeed = feed.isParsed() && (feed.getItems().size() > 0);
-					if (feed.getName() != null)
-						_name.setText(feed.getName());
-				}
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							final FeedProbe probe = new FeedProbe(Uri.parse(url));
+							_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
+							if (probe.isParsed())
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										_name.setText(probe.getName());
+									}
+								});
+						}
+					}).start();
+				} else
+					_isValidFeed = false;
 			}
 
 			@Override

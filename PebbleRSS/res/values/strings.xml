@@ -12,5 +12,9 @@
     <string name="button_negative">No</string>
     <string name="error_feed_invalid">This feed appears to be invalid</string>
     <string name="error_deploy_watchapp">Unable to write to external memory</string>
+    <string name="data_warning_title">Warning</string>
+    <string name="data_warning_message">Using RSS feeds can consume large amounts of data. The developer is not responsible for charges that may apply.</string>
+    <string name="button_agree">I agree</string>
+    <string name="button_disagree">I disagree</string>
 
 </resources>

@@ -20,6 +20,9 @@ import org.w3c.dom.NodeList;
 import android.content.Context;
 import android.net.Uri;
 
+import com.grazz.pebblerss.CanvasRSSPlugin;
+import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
+
 public class FeedManager {
 
 	private static final String FEED_CONFIG_XML = "feed_config.xml";
@@ -43,15 +46,16 @@ public class FeedManager {
 	public void removeFeed(int id) {
 		_feeds.remove(id);
 	}
-	
+
 	public Boolean hasStaleFeeds(Boolean parseIfStale) {
 		Boolean wasStale = false;
-		for (Feed feed: _feeds)
+		for (Feed feed : _feeds)
 			if (feed.isStale()) {
-				if (parseIfStale) feed.doParse();
+				if (parseIfStale)
+					feed.doParse();
 				wasStale = true;
 			}
-		return wasStale;				
+		return wasStale;
 	}
 
 	public void readConfig(Context context) {
@@ -106,4 +110,8 @@ public class FeedManager {
 		}
 	}
 
+	public void writeFeedsAndNotifyCanvas(Context context) {
+		FeedSerializer.serialize(context, this);
+		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, context);
+	}
 }

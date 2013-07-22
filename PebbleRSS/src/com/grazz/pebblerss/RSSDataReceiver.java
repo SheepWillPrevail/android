@@ -13,6 +13,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 import com.grazz.pebblerss.feed.Feed;
 import com.grazz.pebblerss.feed.FeedCursor;
 import com.grazz.pebblerss.feed.FeedItem;
+import com.grazz.pebblerss.feed.FeedManagerCursor;
 
 public class RSSDataReceiver extends PebbleDataReceiver {
 
@@ -23,6 +24,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	private SparseArray<PebbleDictionary> _msgSent = new SparseArray<PebbleDictionary>();
 	private int _transactionId = 0;
 	private Long _lastFeed;
+	private FeedManagerCursor _managerCursor;
 	private FeedCursor _feedCursor;
 
 	protected RSSDataReceiver(RSSService service) {
@@ -47,37 +49,27 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 
 			if (command_id.intValue() == 0) { // hello
 				_msgSent.clear();
-				Integer total = _service.getFeedManager().getFeeds().size();
-				if (total > 32)
-					total = 32; // clamp
-				for (int i = 0; i < total; i++) {
-					PebbleDictionary feed_dict = new PebbleDictionary();
-					String feedName = _service.getFeedManager().getFeed(i).getName();
-					feed_dict.addString(1001, substring(feedName, MAX_LENGTH));
-					feed_dict.addUint8(1011, total.byteValue());
-					feed_dict.addUint8(1012, (byte) i);
-					queueData(feed_dict);
-				}
-				sendData(context);
+				_managerCursor = new FeedManagerCursor(_service.getFeedManager());
+				sendFeed(context);
 			}
 
 			if (command_id.intValue() == 1) // ack
 				sendData(context); // continue queue
 
-			if (command_id.intValue() == 2 && !_feedCursor.isDone()) // continue
+			if (command_id.intValue() == 2 && !_managerCursor.isDone())
+				sendFeed(context);
+
+			if (command_id.intValue() == 3 && !_feedCursor.isDone())
 				sendFeedItem(context);
 		}
 
 		Long feed_id = data.getUnsignedInteger(1091);
 		if (feed_id != null) {
 			Feed feed = _service.getFeedManager().getFeed(feed_id.intValue());
-
 			if (feed.isStale())
 				feed.doParse();
-
 			_lastFeed = feed_id;
 			_feedCursor = new FeedCursor(feed);
-
 			sendFeedItem(context);
 		}
 
@@ -110,6 +102,17 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			url.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			_service.getApplicationContext().startActivity(url);
 		}
+	}
+
+	private void sendFeed(Context context) {
+		int position = _managerCursor.getPosition();
+		Feed feed = _managerCursor.getNextItem();
+		PebbleDictionary feed_dict = new PebbleDictionary();
+		feed_dict.addString(1001, substring(feed.getName(), MAX_LENGTH));
+		feed_dict.addUint8(1011, (byte) _managerCursor.getTotal());
+		feed_dict.addUint8(1012, (byte) position);
+		queueData(feed_dict);
+		sendData(context);
 	}
 
 	private void sendFeedItem(Context context) {

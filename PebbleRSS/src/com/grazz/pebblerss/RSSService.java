@@ -13,8 +13,6 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.PebbleKit.PebbleAckReceiver;
 import com.getpebble.android.kit.PebbleKit.PebbleNackReceiver;
 import com.grazz.pebblerss.feed.FeedManager;
-import com.grazz.pebblerss.feed.FeedSerializer;
-import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class RSSService extends Service {
 
@@ -81,7 +79,7 @@ public class RSSService extends Service {
 					@Override
 					public void run() {
 						if (_feedManager.hasStaleFeeds(true))
-							writeFeedsAndNotifyCanvas();
+							_feedManager.writeFeedsAndNotifyCanvas(RSSService.this);
 					}
 				}, 0, 60 * 1000);
 			}
@@ -91,11 +89,6 @@ public class RSSService extends Service {
 
 	public FeedManager getFeedManager() {
 		return _feedManager;
-	}
-
-	private void writeFeedsAndNotifyCanvas() {
-		FeedSerializer.serialize(this, _feedManager);
-		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, this);
 	}
 
 }

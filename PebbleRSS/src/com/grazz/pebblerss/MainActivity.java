@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ConcurrentModificationException;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,8 +40,10 @@ public class MainActivity extends RSSServiceActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			refreshFeedView();
-			getRSSService().getFeedManager().writeConfig(this);
+			FeedManager feedManager = getRSSService().getFeedManager();
+			feedManager.writeConfig(this);
+			feedManager.writeFeedsAndNotifyCanvas(this);
+			refreshStaleFeeds(feedManager);
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
 			setWatchAppUpdated();
@@ -109,33 +113,38 @@ public class MainActivity extends RSSServiceActivity {
 	}
 
 	private void refreshStaleFeeds(final FeedManager manager) {
-		Thread t = new Thread(new Runnable() {
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for (Feed feed : manager.getFeeds())
-					if (feed.isStale()) {
-						feed.doParse();
-						refreshFeedView();
-					}
+				try {
+					refreshFeedView();
+					for (Feed feed : manager.getFeeds())
+						if (feed.isStale()) {
+							feed.doParse();
+							refreshFeedView();
+						}
+				} catch (ConcurrentModificationException e) {
+				}
 			}
-		});
-		t.start();
+		}).start();
 	}
 
 	private void checkWatchAppUpdate() {
-		SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		final Resources resources = getResources();
+
 		int pebbleAppVersion = pref.getInt(StaticValues.PREFERENCES_VALUE_PEBBLE_APP_VERSION, 1);
 		if (pebbleAppVersion < StaticValues.PEBBLE_APP_VERSION) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getResources().getString(R.string.pebble_app_update_title));
-			builder.setMessage(getResources().getString(R.string.pebble_app_update_message));
-			builder.setPositiveButton(getResources().getString(R.string.button_positive), new DialogInterface.OnClickListener() {
+			builder.setTitle(resources.getString(R.string.pebble_app_update_title));
+			builder.setMessage(resources.getString(R.string.pebble_app_update_message));
+			builder.setPositiveButton(resources.getString(R.string.button_positive), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					sendAppToWatch();
 				}
 			});
-			builder.setNegativeButton(getResources().getString(R.string.button_negative), new DialogInterface.OnClickListener() {
+			builder.setNegativeButton(resources.getString(R.string.button_negative), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					setWatchAppUpdated();
