@@ -1,7 +1,10 @@
 package com.grazz.pebblerss;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipData.Item;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,6 +35,7 @@ public class FeedActivity extends RSSServiceActivity {
 	private int _feedAction;
 	private int _feedId;
 	private Boolean _isValidFeed = false;
+	private Boolean _isViaShare = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +113,8 @@ public class FeedActivity extends RSSServiceActivity {
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
 			}
+			if (_isViaShare)
+				feedManager.writeConfig(this);
 			finish();
 			return true;
 		case R.id.action_delete:
@@ -169,6 +175,21 @@ public class FeedActivity extends RSSServiceActivity {
 			public void afterTextChanged(Editable s) {
 			}
 		});
+
+		tryGetShareItem(intent);
+	}
+
+	@SuppressLint("NewApi")
+	private void tryGetShareItem(Intent intent) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			ClipData clipData = intent.getClipData();
+			if (clipData != null) {
+				Item item = clipData.getItemAt(0);
+				if (item != null)
+					_url.setText(item.getText());
+				_isViaShare = true;
+			}
+		}
 	}
 
 }

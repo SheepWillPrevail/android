@@ -71,6 +71,10 @@ public class MainActivity extends RSSServiceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
+			if (getRSSService().getFeedManager().getFeeds().size() > 63) { // clamp
+				Toast.makeText(this, getResources().getString(R.string.error_feed_limit), Toast.LENGTH_LONG).show();
+				return true;
+			}
 			Intent intent = new Intent(this, FeedActivity.class);
 			intent.putExtra(Feed.FEED_ACTION, Feed.FEED_ADD);
 			startActivityForResult(intent, ID_ACTIVITY_FEED);
@@ -100,6 +104,7 @@ public class MainActivity extends RSSServiceActivity {
 
 		FeedManager manager = getRSSService().getFeedManager();
 		_lvFeeds.setAdapter(new FeedListAdapter(manager, listener));
+		refreshFeedView();
 		refreshStaleFeeds(manager);
 	}
 

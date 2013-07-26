@@ -18,13 +18,13 @@ public class FeedManagerCursor {
 
 	public int getTotal() {
 		int total = _manager.getFeeds().size();
-		if (total > 32)
-			total = 32;
+		if (total > 64)
+			total = 64;
 		return total;
 	}
 
 	public Boolean isDone() {
-		return ((_index + 1) > getTotal()) || _index > 31; // clamp
+		return ((_index + 1) > getTotal()) || _index > 63; // clamp
 	}
 
 	public Feed getNextItem() {

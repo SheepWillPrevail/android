@@ -147,7 +147,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		if (!_msgQueue.isEmpty()) {
 			PebbleDictionary dictionary = _msgQueue.remove();
 			Log.d("sendData", dictionary.toJsonString());
-			int transactionId = _transactionId++ % 255;
+			int transactionId = _transactionId++ % 256;
 			_msgSent.put(transactionId, dictionary);
 			PebbleKit.sendDataToPebbleWithTransactionId(context, StaticValues.APP_UUID, dictionary, transactionId);
 		}
