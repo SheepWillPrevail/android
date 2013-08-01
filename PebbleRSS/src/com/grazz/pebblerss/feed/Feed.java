@@ -1,16 +1,21 @@
 package com.grazz.pebblerss.feed;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.Jsoup;
-import org.mcsoxford.rss.RSSFeed;
-import org.mcsoxford.rss.RSSItem;
-import org.mcsoxford.rss.RSSReader;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.net.Uri;
 
-public class Feed implements Runnable {
+import com.axelby.riasel.FeedParser;
+import com.axelby.riasel.FeedParser.FeedInfoHandler;
+import com.axelby.riasel.FeedParser.FeedItemHandler;
+
+public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 
 	public static final int FEED_ADD = 0;
 	public static final int FEED_EDIT = 1;
@@ -90,21 +95,29 @@ public class Feed implements Runnable {
 
 	@Override
 	public void run() {
-		RSSReader reader = new RSSReader();
 		try {
-			RSSFeed feed = reader.load(_link.toString());
-			if (_name == null)
-				_name = feed.getTitle();
-
 			_items.clear();
-			for (RSSItem item : feed.getItems())
-				_items.add(new FeedItem(item.getTitle(), item.getLink(), Jsoup.parse(item.getDescription()).text()));
-
-			setIsParsed(true);
+			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			factory.setNamespaceAware(true);
+			XmlPullParser parser2 = factory.newPullParser();
+			URL url = new URL(_link.toString());
+			InputStream stream = url.openStream();
+			parser2.setInput(stream, null);
+			FeedParser parser = new FeedParser();
+			parser.setOnFeedInfoHandler(this);
+			parser.setOnFeedItemHandler(this);
+			parser.parseFeed(parser2);
 		} catch (Exception e) {
-		} finally {
-			reader.close();
 		}
 	}
 
+	@Override
+	public void OnFeedInfo(FeedParser feedParser, com.axelby.riasel.Feed feed) {
+		_name = feed.getTitle();
+	}
+
+	@Override
+	public void OnFeedItem(FeedParser feedParser, com.axelby.riasel.FeedItem item) {
+		_items.add(new FeedItem(item.getTitle(), Uri.parse(item.getLink()), Jsoup.parse(item.getDescription()).text()));
+	}
 }

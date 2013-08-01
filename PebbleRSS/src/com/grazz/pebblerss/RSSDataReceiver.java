@@ -17,7 +17,7 @@ import com.grazz.pebblerss.feed.FeedManagerCursor;
 
 public class RSSDataReceiver extends PebbleDataReceiver {
 
-	private static final int MAX_LENGTH = 96;
+	private static final int MAX_LENGTH = 90;
 
 	private RSSService _service;
 	private ArrayDeque<PebbleDictionary> _msgQueue = new ArrayDeque<PebbleDictionary>();
@@ -78,7 +78,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			Feed feed = _service.getFeedManager().getFeed(_lastFeed.intValue());
 			FeedItem item = feed.getItems().get(item_id.intValue());
 			String content = item.getContent();
-			int maxParts = 1000 / MAX_LENGTH;
+			int maxParts = 2000 / MAX_LENGTH;
 			int parts = (content.length() + (MAX_LENGTH - 1)) / MAX_LENGTH;
 			if (parts > maxParts)
 				parts = maxParts; // clamp

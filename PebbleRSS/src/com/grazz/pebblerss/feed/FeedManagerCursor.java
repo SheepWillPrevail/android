@@ -28,6 +28,8 @@ public class FeedManagerCursor {
 	}
 
 	public Feed getNextItem() {
+		if (isDone())
+			return null;
 		int i = _sentItems.nextClearBit(_index);
 		Feed feed = _manager.getFeeds().get(i);
 		_sentItems.set(i);
