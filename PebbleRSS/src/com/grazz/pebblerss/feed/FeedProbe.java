@@ -1,5 +1,6 @@
 package com.grazz.pebblerss.feed;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -9,27 +10,50 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import android.net.Uri;
 
 import com.axelby.riasel.Feed;
+import com.axelby.riasel.FeedItem;
 import com.axelby.riasel.FeedParser;
 import com.axelby.riasel.FeedParser.FeedInfoHandler;
+import com.axelby.riasel.FeedParser.FeedItemHandler;
 
-public class FeedProbe implements FeedInfoHandler {
+public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 
 	private Boolean _isParsed = false;
 	private String _name;
+	private int _itemCount = 0;
 
 	public FeedProbe(Uri link) {
+		XmlPullParserFactory factory = null;
+		XmlPullParser pullparser = null;
+		InputStream stream = null;
+		FeedParser feedparser = null;
+
 		try {
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
-			XmlPullParser parser2 = factory.newPullParser();
+			pullparser = factory.newPullParser();
 			URL url = new URL(link.toString());
-			InputStream stream = url.openStream();
-			parser2.setInput(stream, null);
-			FeedParser parser = new FeedParser();
-			parser.setOnFeedInfoHandler(this);
-			parser.parseFeed(parser2);
+			stream = url.openStream();
+			pullparser.setInput(stream, null);
+			feedparser = new FeedParser();
+			feedparser.setOnFeedInfoHandler(this);
+			feedparser.setOnFeedItemHandler(this);
+			feedparser.parseFeed(pullparser);
+			stream.close();
 			_isParsed = true;
 		} catch (Exception e) {
+		} finally {
+			if (factory != null)
+				factory = null;
+			if (pullparser != null)
+				pullparser = null;
+			if (feedparser != null)
+				feedparser = null;
+			if (stream != null)
+				try {
+					stream.close();
+				} catch (IOException e) {
+				}
+			System.gc();
 		}
 	}
 
@@ -48,11 +72,16 @@ public class FeedProbe implements FeedInfoHandler {
 		if (!isParsed())
 			return 0;
 
-		return 1;
+		return _itemCount;
 	}
 
 	@Override
 	public void OnFeedInfo(FeedParser feedParser, Feed feed) {
 		_name = feed.getTitle();
+	}
+
+	@Override
+	public void OnFeedItem(FeedParser feedParser, FeedItem item) {
+		_itemCount++;
 	}
 }

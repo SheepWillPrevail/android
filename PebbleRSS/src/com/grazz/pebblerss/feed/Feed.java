@@ -1,5 +1,6 @@
 package com.grazz.pebblerss.feed;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -95,19 +96,39 @@ public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 
 	@Override
 	public void run() {
+		XmlPullParserFactory factory = null;
+		XmlPullParser pullparser = null;
+		InputStream stream = null;
+		FeedParser feedparser = null;
+
 		try {
 			_items.clear();
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
-			XmlPullParser parser2 = factory.newPullParser();
+			pullparser = factory.newPullParser();
 			URL url = new URL(_link.toString());
-			InputStream stream = url.openStream();
-			parser2.setInput(stream, null);
-			FeedParser parser = new FeedParser();
-			parser.setOnFeedInfoHandler(this);
-			parser.setOnFeedItemHandler(this);
-			parser.parseFeed(parser2);
+			stream = url.openStream();
+			pullparser.setInput(stream, null);
+			feedparser = new FeedParser();
+			feedparser.setOnFeedInfoHandler(this);
+			feedparser.setOnFeedItemHandler(this);
+			feedparser.parseFeed(pullparser);
+			stream.close();
+			setIsParsed(true);
 		} catch (Exception e) {
+		} finally {
+			if (factory != null)
+				factory = null;
+			if (pullparser != null)
+				pullparser = null;
+			if (feedparser != null)
+				feedparser = null;
+			if (stream != null)
+				try {
+					stream.close();
+				} catch (IOException e) {
+				}
+			System.gc();
 		}
 	}
 

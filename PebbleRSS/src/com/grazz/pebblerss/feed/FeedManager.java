@@ -28,6 +28,7 @@ public class FeedManager {
 	private static final String FEED_CONFIG_XML = "feed_config.xml";
 
 	private ArrayList<Feed> _feeds = new ArrayList<Feed>();
+	private Boolean _isRefreshingFeeds = false;
 
 	public Feed getFeed(int id) {
 		return _feeds.get(id);
@@ -47,15 +48,27 @@ public class FeedManager {
 		_feeds.remove(id);
 	}
 
-	public Boolean hasStaleFeeds(Boolean parseIfStale) {
-		Boolean wasStale = false;
-		for (Feed feed : _feeds)
-			if (feed.isStale()) {
-				if (parseIfStale)
-					feed.doParse();
-				wasStale = true;
+	public Boolean checkStaleFeeds(Context context, Boolean parseIfStale) {
+		Boolean doRefresh = false;
+		synchronized (this) {
+			if (!_isRefreshingFeeds) {
+				_isRefreshingFeeds = true;
+				doRefresh = true;
 			}
-		return wasStale;
+		}
+		if (doRefresh) {
+			Boolean wasStale = false;
+			for (Feed feed : _feeds)
+				if (feed.isStale()) {
+					if (parseIfStale)
+						feed.doParse();
+					wasStale = true;
+				}
+			FeedSerializer.serialize(context, this);
+			_isRefreshingFeeds = false;
+			return wasStale;
+		} else
+			return false;
 	}
 
 	public void readConfig(Context context) {
@@ -110,8 +123,7 @@ public class FeedManager {
 		}
 	}
 
-	public void writeFeedsAndNotifyCanvas(Context context) {
-		FeedSerializer.serialize(context, this);
+	public void notifyCanvas(Context context) {
 		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, context);
 	}
 }

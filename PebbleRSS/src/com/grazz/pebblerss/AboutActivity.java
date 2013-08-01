@@ -22,9 +22,9 @@ public class AboutActivity extends SherlockActivity {
 		setupActionBar();
 
 		addOpenURLOnClickListener(findViewById(R.id.ivWikimedia), "https://donate.wikimedia.org/");
-		addOpenURLOnClickListener(findViewById(R.id.tvRiasel), "https://github.com/thasmin/Riasel");
 		addOpenURLOnClickListener(findViewById(R.id.tvActionBarSherlock), "http://actionbarsherlock.com/");
 		addOpenURLOnClickListener(findViewById(R.id.tvJSoup), "http://jsoup.org/");
+		addOpenURLOnClickListener(findViewById(R.id.tvRiasel), "https://github.com/thasmin/Riasel");
 	}
 
 	private void addOpenURLOnClickListener(View view, final String url) {

@@ -65,9 +65,8 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 
 		Long feed_id = data.getUnsignedInteger(1091);
 		if (feed_id != null) {
+			_service.getFeedManager().checkStaleFeeds(context, true);
 			Feed feed = _service.getFeedManager().getFeed(feed_id.intValue());
-			if (feed.isStale())
-				feed.doParse();
 			_lastFeed = feed_id;
 			_feedCursor = new FeedCursor(feed);
 			sendFeedItem(context);

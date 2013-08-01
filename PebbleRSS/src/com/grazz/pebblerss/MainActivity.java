@@ -42,7 +42,7 @@ public class MainActivity extends RSSServiceActivity {
 		case ID_ACTIVITY_FEED:
 			FeedManager feedManager = getRSSService().getFeedManager();
 			feedManager.writeConfig(this);
-			feedManager.writeFeedsAndNotifyCanvas(this);
+			feedManager.notifyCanvas(this);
 			refreshStaleFeeds(feedManager);
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
@@ -104,7 +104,6 @@ public class MainActivity extends RSSServiceActivity {
 
 		FeedManager manager = getRSSService().getFeedManager();
 		_lvFeeds.setAdapter(new FeedListAdapter(manager, listener));
-		refreshFeedView();
 		refreshStaleFeeds(manager);
 	}
 
@@ -122,12 +121,8 @@ public class MainActivity extends RSSServiceActivity {
 			@Override
 			public void run() {
 				try {
+					manager.checkStaleFeeds(MainActivity.this, true);
 					refreshFeedView();
-					for (Feed feed : manager.getFeeds())
-						if (feed.isStale()) {
-							feed.doParse();
-							refreshFeedView();
-						}
 				} catch (ConcurrentModificationException e) {
 				}
 			}

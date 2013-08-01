@@ -78,8 +78,8 @@ public class RSSService extends Service {
 				_timer.schedule(new TimerTask() {
 					@Override
 					public void run() {
-						if (_feedManager.hasStaleFeeds(true))
-							_feedManager.writeFeedsAndNotifyCanvas(RSSService.this);
+						if (_feedManager.checkStaleFeeds(RSSService.this, true))
+							_feedManager.notifyCanvas(RSSService.this);
 					}
 				}, 0, 60 * 1000);
 			}
