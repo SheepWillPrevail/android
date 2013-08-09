@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -28,7 +29,9 @@ public class RSSService extends Service {
 	private RSSDataReceiver _receiver;
 	private PebbleAckReceiver _ackReceiver;
 	private PebbleNackReceiver _nackReceiver;
-	private Timer _timer;
+
+	private Timer _timer = new Timer(true);
+	private TimerTask _canvasTask;
 
 	public RSSService() {
 		_receiver = new RSSDataReceiver(this);
@@ -62,28 +65,17 @@ public class RSSService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		_timer.cancel();
 		unregisterReceiver(_ackReceiver);
 		unregisterReceiver(_nackReceiver);
-		if (_timer != null)
-			_timer.cancel();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent != null && intent.hasExtra(PassiveRSSDataReceiver.INTENT))
 			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.INTENT));
-		if (intent != null && intent.hasExtra(CanvasRSSPlugin.START_FEED_POLLING)) {
-			if (_timer == null) {
-				_timer = new Timer(true);
-				_timer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						if (_feedManager.checkStaleFeeds(RSSService.this, true))
-							_feedManager.notifyCanvas(RSSService.this);
-					}
-				}, 0, 60 * 1000);
-			}
-		}
+		if (intent != null && intent.hasExtra(CanvasRSSPlugin.START_FEED_POLLING) && isCanvasEnabled())
+			setCanvasEnabled(true);
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -91,4 +83,26 @@ public class RSSService extends Service {
 		return _feedManager;
 	}
 
+	public void sendFontPacket() {
+		_receiver.sendFontPacket(this);
+	}
+
+	public Boolean isCanvasEnabled() {
+		SharedPreferences preferences = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		return preferences.getBoolean(getResources().getString(R.string.setting_enablecanvas), true);
+	}
+
+	public void setCanvasEnabled(Boolean enabled) {
+		if (enabled) {
+			_canvasTask = new TimerTask() {
+				@Override
+				public void run() {
+					if (_feedManager.checkStaleFeeds(RSSService.this, true))
+						_feedManager.notifyCanvas(RSSService.this);
+				}
+			};
+			_timer.schedule(_canvasTask, 0, 60 * 1000);
+		} else if (_canvasTask != null)
+			_canvasTask.cancel();
+	}
 }

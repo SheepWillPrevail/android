@@ -128,13 +128,13 @@ public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 					stream.close();
 				} catch (IOException e) {
 				}
-			System.gc();
 		}
 	}
 
 	@Override
 	public void OnFeedInfo(FeedParser feedParser, com.axelby.riasel.Feed feed) {
-		_name = feed.getTitle();
+		if (_name == null)
+			_name = feed.getTitle();
 	}
 
 	@Override

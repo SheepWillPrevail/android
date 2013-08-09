@@ -53,7 +53,6 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 					stream.close();
 				} catch (IOException e) {
 				}
-			System.gc();
 		}
 	}
 

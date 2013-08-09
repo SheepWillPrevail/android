@@ -5,17 +5,61 @@
     <string name="title_activity_main">Feeds</string>
     <string name="title_activity_feed">Feed</string>
     <string name="title_activity_about">About</string>
+    <string name="title_activity_settings">Settings</string>
     <string name="msg_service_running">The service is running.</string>
     <string name="pebble_app_update_title">Update available</string>
     <string name="pebble_app_update_message">Would you like to update the watch app?</string>
     <string name="button_positive">Yes</string>
     <string name="button_negative">No</string>
-    <string name="error_feed_invalid">This feed appears to be invalid</string>
-    <string name="error_deploy_watchapp">Unable to write to external memory</string>
     <string name="data_warning_title">Warning</string>
     <string name="data_warning_message">Using RSS feeds can consume large amounts of data. The developer is not responsible for charges that may apply.</string>
     <string name="button_agree">I agree</string>
     <string name="button_disagree">I disagree</string>
-    <string name="error_feed_limit">Currently no more than 64 feeds are supported.</string>
+    <string name="error_feed_invalid">This feed appears to be invalid.</string>
+    <string name="error_deploy_watchapp">Unable to write to external memory.</string>
+    <string name="error_feed_limit">Currently no more than 48 feeds are supported.</string>
+    <string name="setting_section_pebble">Watch app</string>
+    <string name="setting_section_canvas">Pebble Canvas plugin</string>
+    <string name="setting_title_feedfont">Feed list font</string>
+    <string name="setting_title_itemfont">Feed item font</string>
+    <string name="setting_title_messagefont">Item text font</string>
+    <string name="setting_title_canvas_enabled">Background refresh enabled</string>
+    <string name="setting_title_canvas_disabled">Background refresh disabled</string>
+    <string name="setting_feedfont">feedfont</string>
+    <string name="setting_itemfont">itemfont</string>
+    <string name="setting_messagefont">messagefont</string>
+    <string name="setting_enablecanvas">enablecanvas</string>
+
+    <string-array name="setting_fonts">
+        <item>Gothic 14</item>
+        <item>Gothic 14 bold</item>
+        <item>Gothic 18</item>
+        <item>Gothic 18 bold</item>
+        <item>Gothic 24</item>
+        <item>Gothic 24 bold</item>
+        <item>Gothic 28</item>
+        <item>Gothic 28 bold</item>
+        <item>Bitham 30 black</item>
+        <item>Bitham 42 bold</item>
+        <item>Bitham 42 light</item>
+        <item>Roboto 21 condensed</item>
+        <item>Droid Serif 28 bold</item>
+    </string-array>
+    <string-array name="setting_fonts_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+    </string-array>
 
 </resources>

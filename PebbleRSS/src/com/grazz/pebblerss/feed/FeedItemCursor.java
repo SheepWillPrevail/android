@@ -2,13 +2,13 @@ package com.grazz.pebblerss.feed;
 
 import java.util.BitSet;
 
-public class FeedCursor {
+public class FeedItemCursor {
 
 	private Feed _feed;
 	private BitSet _sentItems;
 	private int _index = 0;
 
-	public FeedCursor(Feed feed) {
+	public FeedItemCursor(Feed feed) {
 		_feed = feed;
 		_sentItems = new BitSet(_feed.getItems().size());
 	}
@@ -29,11 +29,14 @@ public class FeedCursor {
 	}
 
 	public FeedItem getNextItem() {
-		int i = _sentItems.nextClearBit(_index);
-		FeedItem item = _feed.getItems().get(i);
-		_sentItems.set(i);
-		_index++;
-		return item;
+		if (!_feed.getItems().isEmpty() && !isDone()) {
+			int i = _sentItems.nextClearBit(_index);
+			FeedItem item = _feed.getItems().get(i);
+			_sentItems.set(i);
+			_index++;
+			return item;
+		} else
+			return null;
 	}
 
 }

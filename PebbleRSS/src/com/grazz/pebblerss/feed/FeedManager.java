@@ -21,6 +21,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.grazz.pebblerss.CanvasRSSPlugin;
+import com.grazz.pebblerss.feed.canvas.FeedSerializer;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class FeedManager {
@@ -126,4 +127,5 @@ public class FeedManager {
 	public void notifyCanvas(Context context) {
 		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, context);
 	}
+
 }

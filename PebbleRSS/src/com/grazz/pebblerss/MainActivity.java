@@ -31,6 +31,7 @@ public class MainActivity extends RSSServiceActivity {
 
 	private static final int ID_ACTIVITY_FEED = 0;
 	private static final int ID_ACTIVITY_UPDATEWATCHAPP = 1;
+	private static final int ID_ACTIVITY_SETTINGS = 2;
 	private static final String WATCHAPP_FILENAME = "pebblerss.pbw";
 
 	private ListView _lvFeeds;
@@ -38,15 +39,19 @@ public class MainActivity extends RSSServiceActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		RSSService service = getRSSService();
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			FeedManager feedManager = getRSSService().getFeedManager();
+			FeedManager feedManager = service.getFeedManager();
 			feedManager.writeConfig(this);
 			feedManager.notifyCanvas(this);
 			refreshStaleFeeds(feedManager);
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
 			setWatchAppUpdated();
+			break;
+		case ID_ACTIVITY_SETTINGS:
+			service.setCanvasEnabled(service.isCanvasEnabled());
 			break;
 		}
 	}
@@ -55,9 +60,9 @@ public class MainActivity extends RSSServiceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		startService(new Intent(this, RSSService.class));
 		_lvFeeds = (ListView) findViewById(R.id.lvFeeds);
 		_lvFeeds.setEmptyView(findViewById(R.id.lvFeedsEmpty));
-		startService(new Intent(this, RSSService.class));
 		checkWatchAppUpdate();
 	}
 
@@ -71,7 +76,7 @@ public class MainActivity extends RSSServiceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
-			if (getRSSService().getFeedManager().getFeeds().size() > 63) { // clamp
+			if (getRSSService().getFeedManager().getFeeds().size() > 47) { // clamp
 				Toast.makeText(this, getResources().getString(R.string.error_feed_limit), Toast.LENGTH_LONG).show();
 				return true;
 			}
@@ -84,6 +89,9 @@ public class MainActivity extends RSSServiceActivity {
 			return true;
 		case R.id.action_app:
 			sendAppToWatch();
+			return true;
+		case R.id.action_settings:
+			startActivityForResult(new Intent(this, SettingsActivity.class), ID_ACTIVITY_SETTINGS);
 			return true;
 		}
 		return false;

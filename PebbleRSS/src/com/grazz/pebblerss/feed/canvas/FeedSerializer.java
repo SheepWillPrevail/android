@@ -1,4 +1,4 @@
-package com.grazz.pebblerss.feed;
+package com.grazz.pebblerss.feed.canvas;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +7,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.grazz.pebblerss.feed.Feed;
+import com.grazz.pebblerss.feed.FeedItem;
+import com.grazz.pebblerss.feed.FeedManager;
 
 import android.content.Context;
 

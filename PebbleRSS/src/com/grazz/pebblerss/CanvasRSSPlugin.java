@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 
-import com.grazz.pebblerss.feed.FeedSerializer;
-import com.grazz.pebblerss.feed.SerializedFeed;
+import com.grazz.pebblerss.feed.canvas.FeedSerializer;
+import com.grazz.pebblerss.feed.canvas.SerializedFeed;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class CanvasRSSPlugin extends PebbleCanvasPlugin {

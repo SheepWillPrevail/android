@@ -1,4 +1,4 @@
-package com.grazz.pebblerss.feed;
+package com.grazz.pebblerss.feed.canvas;
 
 import java.io.Serializable;
 
