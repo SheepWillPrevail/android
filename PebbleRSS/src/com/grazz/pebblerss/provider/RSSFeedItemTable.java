@@ -61,7 +61,7 @@ public class RSSFeedItemTable extends SQLiteOpenHelper {
 	public void addFeedItem(RSSFeed feed, RSSFeedItem item) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_FEED_ID, feed.getId());
-		values.put(COLUMN_UNIQUE_ID, item.getContent());
+		values.put(COLUMN_UNIQUE_ID, item.getUniqueId());
 		values.put(COLUMN_PUBLICATION_DATE, item.getPublicationDate().getTime());
 		values.put(COLUMN_URI, item.getUri().toString());
 		values.put(COLUMN_TITLE, item.getTitle());
