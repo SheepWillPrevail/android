@@ -23,8 +23,8 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 	private static final String MASK_TITLE = "%rt";
 	private static final String MASK_TIME12 = "%rp";
 	private static final String MASK_TIME24 = "%rP";
-
-	private final SimpleDateFormat _timeFormats[] = new SimpleDateFormat[] { new SimpleDateFormat("h:mma"), new SimpleDateFormat("HH:mm") };
+	private static final SimpleDateFormat FORMAT_TIME12 = new SimpleDateFormat("h:mma");
+	private static final SimpleDateFormat FORMAT_TIME24 = new SimpleDateFormat("HH:mm");
 
 	private void startService(Context context) {
 		Intent intent = new Intent(context, RSSService.class);
@@ -58,7 +58,7 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 		plugin.format_masks.add(MASK_TIME24);
 
 		plugin.default_format_string = MASK_TITLE;
-		plugin.params_description = "feed(0-47),item(0-127)";
+		plugin.params_description = "feed(0-47),item(0-)";
 
 		plugins.add(plugin);
 		return plugins;
@@ -100,10 +100,11 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 			return item.getTitle();
 
 		if (MASK_TIME12.equals(format_mask))
-			return _timeFormats[0].format(item.getPublicationDate()).toLowerCase();
+			return FORMAT_TIME12.format(item.getPublicationDate()).toLowerCase();
 
 		if (MASK_TIME24.equals(format_mask))
-			return _timeFormats[1].format(item.getPublicationDate()).toLowerCase();
+			return FORMAT_TIME24.format(item.getPublicationDate()).toLowerCase();
+
 		return empty;
 	}
 

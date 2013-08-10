@@ -7,7 +7,6 @@ import android.content.Context;
 
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
-import com.grazz.pebblerss.provider.RSSFeedItemTable;
 
 public class FeedItemCursor {
 
@@ -16,7 +15,7 @@ public class FeedItemCursor {
 	private int _index = 0;
 
 	public FeedItemCursor(Context context, RSSFeed feed) {
-		_items = new RSSFeedItemTable(context).getFeedItems(feed);
+		_items = feed.getItems(context);
 		_sentItems = new BitSet(_items.size());
 	}
 

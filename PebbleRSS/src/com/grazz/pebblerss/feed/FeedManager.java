@@ -33,7 +33,7 @@ public class FeedManager {
 	}
 
 	public List<RSSFeed> getFeeds() {
-		return new RSSFeedTable(_context).getFeeds();
+		return RSSFeed.getFeeds(_context);
 	}
 
 	public RSSFeed getFeed(int index) {
@@ -63,16 +63,14 @@ public class FeedManager {
 	}
 
 	public void removeFeed(RSSFeed feed) {
-		RSSFeedTable db = new RSSFeedTable(_context);
-		db.removeFeed(feed);
-		db.close();
-
+		new RSSFeedTable(_context).removeFeed(feed);
+		new RSSFeedItemTable(_context).deleteFeedItems(feed);
 		notifyCanvas(_context);
 	}
 
 	public Boolean checkFeeds(Boolean parseIfStale) {
-		SharedPreferences pref = _context.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		RSSFeedItemTable itemTable = new RSSFeedItemTable(_context);
+		SharedPreferences pref = _context.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		int retentionPeriod = Integer.valueOf(pref.getString(_context.getResources().getString(R.string.setting_retention), "24"));
 
 		Boolean doRefresh = false;
@@ -82,20 +80,22 @@ public class FeedManager {
 				doRefresh = true;
 			}
 		}
+
 		Boolean wasStale = false;
 		for (RSSFeed feed : getFeeds()) {
 			if (feed.isStale()) {
 				if (doRefresh && parseIfStale) {
-					FeedRunner runner = new FeedRunner(_context, feed);
-					runner.doParse();
+					new FeedRunner(_context, feed).doParse();
 					feed.save(_context);
 					wasStale = true;
 				}
 			}
 			itemTable.cleanupExpired(feed, retentionPeriod);
 		}
+
 		if (doRefresh)
 			_isRefreshingFeeds = false;
+
 		return wasStale;
 	}
 

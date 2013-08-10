@@ -94,8 +94,9 @@ public class FeedRunner implements Runnable, FeedInfoHandler, FeedItemHandler {
 
 	@Override
 	public void OnFeedItem(FeedParser feedParser, com.axelby.riasel.FeedItem item) {
-		if (!_itemDB.hasFeedItem(_feed, item.getPublicationDate())) {
+		if (!_itemDB.hasFeedItem(_feed, item.getUniqueId())) {
 			RSSFeedItem feedItem = new RSSFeedItem();
+			feedItem.setUniqueId(item.getUniqueId());
 			feedItem.setPublicationDate(item.getPublicationDate());
 			feedItem.setUri(Uri.parse(item.getLink()));
 			feedItem.setTitle(item.getTitle());

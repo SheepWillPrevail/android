@@ -68,4 +68,8 @@ public class RSSFeed extends RSSTableEntity {
 	public void save(Context context) {
 		new RSSFeedTable(context).updateFeed(this);
 	}
+
+	public static List<RSSFeed> getFeeds(Context context) {
+		return new RSSFeedTable(context).getFeeds();
+	}
 }

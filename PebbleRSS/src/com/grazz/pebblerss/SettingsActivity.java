@@ -1,11 +1,13 @@
 package com.grazz.pebblerss;
 
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.Preference;
@@ -33,9 +35,13 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		bindService(new Intent(this, RSSService.class), _rssServiceConnection, Context.BIND_AUTO_CREATE);
+		setupActionBar();
+
 		getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 		getPreferenceManager().setSharedPreferencesName(StaticValues.PREFERENCES_KEY);
+
 		addPreferencesFromResource(R.xml.settings);
+
 		OnPreferenceChangeListener listener = new OnPreferenceChangeListener() {
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -48,10 +54,21 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 				return true;
 			}
 		};
+
 		findPreference(getResources().getString(R.string.setting_cellheight)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_feedfont)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_itemfont)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_messagefont)).setOnPreferenceChangeListener(listener);
+	}
+
+	/**
+	 * Set up the {@link android.app.ActionBar}, if the API is available.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setupActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	@Override

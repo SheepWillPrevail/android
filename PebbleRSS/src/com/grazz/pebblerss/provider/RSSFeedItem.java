@@ -6,6 +6,7 @@ import android.net.Uri;
 
 public class RSSFeedItem extends RSSTableEntity {
 
+	private String _uniqueId;
 	private Date _publicationDate;
 	private Uri _uri;
 	private String _title;
@@ -17,6 +18,14 @@ public class RSSFeedItem extends RSSTableEntity {
 
 	public void setPublicationDate(Date publicationDate) {
 		_publicationDate = publicationDate;
+	}
+
+	public String getUniqueId() {
+		return _uniqueId;
+	}
+
+	public void setUniqueId(String uniqueId) {
+		_uniqueId = uniqueId;
 	}
 
 	public Uri getUri() {

@@ -8,7 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class PassiveRSSDataReceiver extends BroadcastReceiver {
+public class PebbleWakeupReceiver extends BroadcastReceiver {
 
 	public static final String DATA = "data";
 

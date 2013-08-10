@@ -14,7 +14,6 @@ import com.grazz.pebblerss.StaticValues;
 
 public class RSSFeedTable extends SQLiteOpenHelper {
 
-	private static final int DATABASE_VERSION = 1;
 	private static final String TABLE_NAME = "feed";
 
 	public static final String COLUMN_ID = "_id";
@@ -24,7 +23,7 @@ public class RSSFeedTable extends SQLiteOpenHelper {
 	public static final String COLUMN_LAST_UPDATE = "last_update";
 
 	public RSSFeedTable(Context context) {
-		super(context, StaticValues.DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, StaticValues.DATABASE_NAME, null, StaticValues.DATABASE_VERSION);
 	}
 
 	@Override
@@ -39,7 +38,7 @@ public class RSSFeedTable extends SQLiteOpenHelper {
 		builder.append(")");
 		db.execSQL(builder.toString());
 	}
-	
+
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		super.onOpen(db);
@@ -51,14 +50,13 @@ public class RSSFeedTable extends SQLiteOpenHelper {
 	}
 
 	public void addFeed(RSSFeed feed) {
-		SQLiteDatabase db = getWritableDatabase();
-
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_URI, feed.getUri().toString());
 		values.put(COLUMN_NAME, feed.getName());
 		values.put(COLUMN_INTERVAL, feed.getInterval());
 		values.put(COLUMN_LAST_UPDATE, feed.getLastUpdated());
 
+		SQLiteDatabase db = getWritableDatabase();
 		feed.setId(db.insert(TABLE_NAME, null, values));
 		db.close();
 	}
@@ -66,8 +64,9 @@ public class RSSFeedTable extends SQLiteOpenHelper {
 	public List<RSSFeed> getFeeds() {
 		List<RSSFeed> feeds = new ArrayList<RSSFeed>();
 
-		Cursor cursor = getReadableDatabase().query(TABLE_NAME, new String[] { COLUMN_ID, COLUMN_URI, COLUMN_NAME, COLUMN_INTERVAL, COLUMN_LAST_UPDATE }, null,
-				null, null, null, COLUMN_ID + " ASC");
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor cursor = db.query(TABLE_NAME, new String[] { COLUMN_ID, COLUMN_URI, COLUMN_NAME, COLUMN_INTERVAL, COLUMN_LAST_UPDATE }, null, null, null, null,
+				COLUMN_ID + " ASC");
 
 		try {
 			if (cursor != null) {
@@ -85,18 +84,19 @@ public class RSSFeedTable extends SQLiteOpenHelper {
 			cursor.close();
 		}
 
+		db.close();
+
 		return feeds;
 	}
 
 	public void updateFeed(RSSFeed feed) {
-		SQLiteDatabase db = getWritableDatabase();
-
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_URI, feed.getUri().toString());
 		values.put(COLUMN_NAME, feed.getName());
 		values.put(COLUMN_INTERVAL, feed.getInterval());
 		values.put(COLUMN_LAST_UPDATE, feed.getLastUpdated());
 
+		SQLiteDatabase db = getWritableDatabase();
 		db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[] { String.valueOf(feed.getId()) });
 		db.close();
 	}

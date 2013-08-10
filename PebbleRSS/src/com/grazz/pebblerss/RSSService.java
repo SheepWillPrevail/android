@@ -73,10 +73,12 @@ public class RSSService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent.hasExtra(PassiveRSSDataReceiver.DATA))
-			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.DATA));
-		if (intent.hasExtra(CanvasRSSPlugin.PLUGINSTART) && isCanvasEnabled())
-			setCanvasEnabled(true);
+		if (intent != null) {
+			if (intent.hasExtra(PebbleWakeupReceiver.DATA))
+				_receiver.onReceive(this, (Intent) intent.getExtras().get(PebbleWakeupReceiver.DATA));
+			if (intent.hasExtra(CanvasRSSPlugin.PLUGINSTART) && isCanvasEnabled())
+				setCanvasEnabled(true);
+		}
 		return super.onStartCommand(intent, flags, startId);
 	}
 
