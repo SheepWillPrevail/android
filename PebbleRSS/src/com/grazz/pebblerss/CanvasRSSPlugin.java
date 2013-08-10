@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
-import com.grazz.pebblerss.provider.RSSFeedTable;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 @SuppressLint({ "SimpleDateFormat", "DefaultLocale" })
@@ -58,7 +57,7 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 		plugin.format_masks.add(MASK_TIME24);
 
 		plugin.default_format_string = MASK_TITLE;
-		plugin.params_description = "feed(0-47),item(0-)";
+		plugin.params_description = "1-48 (feed) , 1- (item)";
 
 		plugins.add(plugin);
 		return plugins;
@@ -67,8 +66,8 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 	@Override
 	protected String get_format_mask_value(int def_id, String format_mask, Context context, String param) {
 		String empty = "";
-		String[] params = param.split(",");
 
+		String[] params = param.split(",");
 		if (params.length < 2)
 			return empty;
 
@@ -79,22 +78,20 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 			itemId = Integer.parseInt(params[1]);
 		} catch (Exception e) {
 		}
-
-		if (feedId == null || itemId == null || feedId < 0 || itemId < 0)
+		if (feedId == null || itemId == null || feedId < 1 || itemId < 1)
 			return empty;
 
-		List<RSSFeed> feeds = new RSSFeedTable(context).getFeeds();
-
-		if (feedId > feeds.size() - 1)
+		List<RSSFeed> feeds = RSSFeed.getFeeds(context);
+		if (feedId > feeds.size())
 			return empty;
 
-		RSSFeed feed = feeds.get(feedId);
+		RSSFeed feed = feeds.get(feedId - 1);
+
 		List<RSSFeedItem> items = feed.getItems(context);
-
-		if (items != null && itemId > items.size() - 1)
+		if (itemId > items.size())
 			return empty;
 
-		RSSFeedItem item = items.get(itemId);
+		RSSFeedItem item = items.get(itemId - 1);
 
 		if (MASK_TITLE.equals(format_mask))
 			return item.getTitle();

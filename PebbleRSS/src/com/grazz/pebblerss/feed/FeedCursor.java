@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 
 import com.grazz.pebblerss.provider.RSSFeed;
-import com.grazz.pebblerss.provider.RSSFeedTable;
 
 public class FeedCursor {
 
@@ -15,7 +14,7 @@ public class FeedCursor {
 	private int _index = 0;
 
 	public FeedCursor(Context context) {
-		_feeds = new RSSFeedTable(context).getFeeds();
+		_feeds = RSSFeed.getFeeds(context);
 		_sentItems = new BitSet(_feeds.size());
 	}
 
@@ -31,7 +30,7 @@ public class FeedCursor {
 	}
 
 	public Boolean isDone() {
-		return ((_index + 1) > getTotal()) || _index > 47; // clamp
+		return _index + 1 > getTotal();
 	}
 
 	public RSSFeed getItem(int index) {
@@ -39,11 +38,10 @@ public class FeedCursor {
 	}
 
 	public RSSFeed getNextItem() {
-		if (!_feeds.isEmpty() && !isDone()) {
-			int i = _sentItems.nextClearBit(_index);
-			RSSFeed feed = _feeds.get(i);
-			_sentItems.set(i);
-			_index++;
+		if (!isDone()) {
+			int index = _sentItems.nextClearBit(_index++);
+			RSSFeed feed = getItem(index);
+			_sentItems.set(index);
 			return feed;
 		} else
 			return null;

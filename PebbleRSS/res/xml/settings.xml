@@ -12,7 +12,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/setting_section_pebble" >
         <EditTextPreference
-            android:defaultValue="30"
+            android:defaultValue="33"
             android:inputType="number"
             android:key="@string/setting_cellheight"
             android:title="@string/setting_title_cellheight" >
@@ -26,7 +26,7 @@
             android:title="@string/setting_title_feedfont" >
         </ListPreference>
         <ListPreference
-            android:defaultValue="3"
+            android:defaultValue="0"
             android:entries="@array/setting_fonts"
             android:entryValues="@array/setting_fonts_values"
             android:key="@string/setting_itemfont"

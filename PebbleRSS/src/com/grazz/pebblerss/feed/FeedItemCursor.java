@@ -31,7 +31,7 @@ public class FeedItemCursor {
 	}
 
 	public Boolean isDone() {
-		return ((_index + 1) > getTotal()) || _index > 127; // clamp
+		return _index + 1 > getTotal();
 	}
 
 	public RSSFeedItem getItem(int index) {
@@ -39,11 +39,10 @@ public class FeedItemCursor {
 	}
 
 	public RSSFeedItem getNextItem() {
-		if (!_items.isEmpty() && !isDone()) {
-			int i = _sentItems.nextClearBit(_index);
-			RSSFeedItem item = _items.get(i);
-			_sentItems.set(i);
-			_index++;
+		if (!isDone()) {
+			int index = _sentItems.nextClearBit(_index++);
+			RSSFeedItem item = getItem(index);
+			_sentItems.set(index);
 			return item;
 		} else
 			return null;

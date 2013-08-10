@@ -1,6 +1,5 @@
 package com.grazz.pebblerss.provider;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -54,22 +53,16 @@ public class RSSFeed extends RSSTableEntity {
 		return System.currentTimeMillis() > getLastUpdated() + (60 * 1000 * getInterval());
 	}
 
-	public List<RSSFeedItem> getItems(Context context) {
-		List<RSSFeedItem> items = null;
-		try {
-			items = new RSSFeedItemTable(context).getFeedItems(this);
-		} catch (Exception e) {
-		}
-		if (items == null)
-			items = new ArrayList<RSSFeedItem>();
-		return items;
-	}
-
 	public void save(Context context) {
 		new RSSFeedTable(context).updateFeed(this);
+	}
+
+	public List<RSSFeedItem> getItems(Context context) {
+		return new RSSFeedItemTable(context).getFeedItems(this);
 	}
 
 	public static List<RSSFeed> getFeeds(Context context) {
 		return new RSSFeedTable(context).getFeeds();
 	}
+
 }

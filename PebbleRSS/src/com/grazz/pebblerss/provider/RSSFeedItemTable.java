@@ -121,7 +121,7 @@ public class RSSFeedItemTable extends SQLiteOpenHelper {
 	}
 
 	public void cleanupExpired(RSSFeed feed, int period) {
-		long expiredate = System.currentTimeMillis() - (period * 3600000);
+		long expiredate = feed.getLastUpdated() - (period * 3600000);
 
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(TABLE_NAME, COLUMN_FEED_ID + "=? and " + COLUMN_PUBLICATION_DATE + "<?",

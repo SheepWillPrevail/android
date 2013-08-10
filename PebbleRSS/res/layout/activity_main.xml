@@ -22,7 +22,7 @@
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:text="No feeds founds"
+        android:text="@string/no_feeds"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

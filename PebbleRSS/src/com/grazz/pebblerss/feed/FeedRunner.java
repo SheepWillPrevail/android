@@ -12,13 +12,12 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.axelby.riasel.FeedParser;
-import com.axelby.riasel.FeedParser.FeedInfoHandler;
 import com.axelby.riasel.FeedParser.FeedItemHandler;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
 import com.grazz.pebblerss.provider.RSSFeedItemTable;
 
-public class FeedRunner implements Runnable, FeedInfoHandler, FeedItemHandler {
+public class FeedRunner implements Runnable, FeedItemHandler {
 
 	private RSSFeed _feed;
 	private Boolean _isParsed = false;
@@ -65,7 +64,6 @@ public class FeedRunner implements Runnable, FeedInfoHandler, FeedItemHandler {
 			stream = url.openStream();
 			pullparser.setInput(stream, null);
 			feedparser = new FeedParser();
-			feedparser.setOnFeedInfoHandler(this);
 			feedparser.setOnFeedItemHandler(this);
 			feedparser.parseFeed(pullparser);
 			stream.close();
@@ -84,12 +82,6 @@ public class FeedRunner implements Runnable, FeedInfoHandler, FeedItemHandler {
 				} catch (IOException e) {
 				}
 		}
-	}
-
-	@Override
-	public void OnFeedInfo(FeedParser feedParser, com.axelby.riasel.Feed feed) {
-		if (_feed.getName() == null)
-			_feed.setName(feed.getTitle());
 	}
 
 	@Override

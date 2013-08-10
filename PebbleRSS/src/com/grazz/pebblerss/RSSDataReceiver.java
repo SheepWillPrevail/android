@@ -118,27 +118,23 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	private void sendFeed(Context context) {
 		int position = _feedCursor.getPosition();
 		RSSFeed feed = _feedCursor.getNextItem();
-		if (feed != null) {
-			PebbleDictionary feed_dict = new PebbleDictionary();
-			feed_dict.addString(1001, substring(feed.getName(), MAX_LENGTH));
-			feed_dict.addUint8(1011, (byte) _feedCursor.getTotal());
-			feed_dict.addUint8(1012, (byte) position);
-			queueData(feed_dict);
-			sendData(context);
-		}
+		PebbleDictionary feed_dict = new PebbleDictionary();
+		feed_dict.addString(1001, substring(feed.getName(), MAX_LENGTH));
+		feed_dict.addUint8(1011, (byte) _feedCursor.getTotal());
+		feed_dict.addUint8(1012, (byte) position);
+		queueData(feed_dict);
+		sendData(context);
 	}
 
 	private void sendFeedItem(Context context) {
 		int position = _feedItemCursor.getPosition();
 		RSSFeedItem item = _feedItemCursor.getNextItem();
-		if (item != null) {
-			PebbleDictionary item_dict = new PebbleDictionary();
-			item_dict.addString(1002, substring(item.getTitle(), MAX_LENGTH));
-			item_dict.addUint8(1011, (byte) _feedItemCursor.getTotal());
-			item_dict.addUint8(1012, (byte) position);
-			queueData(item_dict);
-			sendData(context);
-		}
+		PebbleDictionary item_dict = new PebbleDictionary();
+		item_dict.addString(1002, substring(item.getTitle(), MAX_LENGTH));
+		item_dict.addUint8(1011, (byte) _feedItemCursor.getTotal());
+		item_dict.addUint8(1012, (byte) position);
+		queueData(item_dict);
+		sendData(context);
 	}
 
 	private void sendFeedItemText(Context context, Long item_id) {
@@ -166,9 +162,9 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		Resources resources = context.getResources();
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(1013, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_feedfont), "5")).byteValue());
-		dictionary.addUint8(1014, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_itemfont), "3")).byteValue());
+		dictionary.addUint8(1014, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_itemfont), "0")).byteValue());
 		dictionary.addUint8(1015, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_messagefont), "0")).byteValue());
-		dictionary.addUint8(1016, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_cellheight), "30")).byteValue());
+		dictionary.addUint8(1016, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_cellheight), "33")).byteValue());
 		queueData(dictionary);
 		sendData(context);
 	}

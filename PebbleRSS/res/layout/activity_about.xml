@@ -24,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:text="Like this program? Please donate to a charity of your choice. My suggestion:" />
+        android:text="@string/donation" />
 
     <ImageView
         android:id="@+id/ivWikimedia"
@@ -41,7 +41,7 @@
         android:layout_below="@+id/ivWikimedia"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:text="This program uses the following libraries:"
+        android:text="@string/libraries_used"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
