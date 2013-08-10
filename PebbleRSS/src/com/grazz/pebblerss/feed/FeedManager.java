@@ -1,16 +1,10 @@
 package com.grazz.pebblerss.feed;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,38 +12,69 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.grazz.pebblerss.CanvasRSSPlugin;
-import com.grazz.pebblerss.feed.canvas.FeedSerializer;
+import com.grazz.pebblerss.R;
+import com.grazz.pebblerss.StaticValues;
+import com.grazz.pebblerss.provider.RSSFeed;
+import com.grazz.pebblerss.provider.RSSFeedItemTable;
+import com.grazz.pebblerss.provider.RSSFeedTable;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class FeedManager {
 
-	private static final String FEED_CONFIG_XML = "feed_config.xml";
-
-	private ArrayList<Feed> _feeds = new ArrayList<Feed>();
+	private Context _context;
 	private Boolean _isRefreshingFeeds = false;
 
-	public Feed getFeed(int id) {
-		return _feeds.get(id);
+	public FeedManager(Context context) {
+		_context = context;
 	}
 
-	public ArrayList<Feed> getFeeds() {
-		return _feeds;
+	public List<RSSFeed> getFeeds() {
+		return new RSSFeedTable(_context).getFeeds();
 	}
 
-	public Feed addFeed(Uri link) {
-		Feed feed = new Feed(link);
-		_feeds.add(feed);
+	public RSSFeed getFeed(int index) {
+		return getFeeds().get(index);
+	}
+
+	public RSSFeed getFeedById(long id) {
+		for (RSSFeed feed : getFeeds())
+			if (feed.getId() == id)
+				return feed;
+		return null;
+	}
+
+	public RSSFeed addFeed(Uri uri, String name, int interval) {
+		RSSFeed feed = new RSSFeed();
+		feed.setUri(uri);
+		feed.setName(name);
+		feed.setInterval(interval);
+
+		RSSFeedTable db = new RSSFeedTable(_context);
+		db.addFeed(feed);
+		db.close();
+
+		notifyCanvas(_context);
+
 		return feed;
 	}
 
-	public void removeFeed(int id) {
-		_feeds.remove(id);
+	public void removeFeed(RSSFeed feed) {
+		RSSFeedTable db = new RSSFeedTable(_context);
+		db.removeFeed(feed);
+		db.close();
+
+		notifyCanvas(_context);
 	}
 
-	public Boolean checkStaleFeeds(Context context, Boolean parseIfStale) {
+	public Boolean checkFeeds(Boolean parseIfStale) {
+		SharedPreferences pref = _context.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		RSSFeedItemTable itemTable = new RSSFeedItemTable(_context);
+		int retentionPeriod = Integer.valueOf(pref.getString(_context.getResources().getString(R.string.setting_retention), "24"));
+
 		Boolean doRefresh = false;
 		synchronized (this) {
 			if (!_isRefreshingFeeds) {
@@ -57,22 +82,25 @@ public class FeedManager {
 				doRefresh = true;
 			}
 		}
-		if (doRefresh) {
-			Boolean wasStale = false;
-			for (Feed feed : _feeds)
-				if (feed.isStale()) {
-					if (parseIfStale)
-						feed.doParse();
+		Boolean wasStale = false;
+		for (RSSFeed feed : getFeeds()) {
+			if (feed.isStale()) {
+				if (doRefresh && parseIfStale) {
+					FeedRunner runner = new FeedRunner(_context, feed);
+					runner.doParse();
+					feed.save(_context);
 					wasStale = true;
 				}
-			FeedSerializer.serialize(context, this);
+			}
+			itemTable.cleanupExpired(feed, retentionPeriod);
+		}
+		if (doRefresh)
 			_isRefreshingFeeds = false;
-			return wasStale;
-		} else
-			return false;
+		return wasStale;
 	}
 
-	public void readConfig(Context context) {
+	public void convertOldConfig(Context context) {
+		String FEED_CONFIG_XML = "feed_config.xml";
 		File feedFile = new File(context.getFilesDir(), FEED_CONFIG_XML);
 		if (feedFile.exists()) {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -85,47 +113,21 @@ public class FeedManager {
 					Node node = nodeList.item(i);
 					String link = node.getAttributes().getNamedItem("link").getNodeValue();
 					String name = node.getAttributes().getNamedItem("name").getNodeValue();
-
 					String interval = "30";
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-					_feeds.add(new Feed(Uri.parse(link), name, Integer.valueOf(interval)));
+					addFeed(Uri.parse(link), name, Integer.valueOf(interval));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	public void writeConfig(Context context) {
-		File feedFile = new File(context.getFilesDir(), FEED_CONFIG_XML);
-		if (feedFile.exists())
 			feedFile.delete();
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		try {
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.newDocument();
-			Element documentElement = document.createElement("feeds");
-			for (Feed feed : _feeds) {
-				Element feedNode = document.createElement("feed");
-				feedNode.setAttribute("link", feed.getLink().toString());
-				feedNode.setAttribute("name", feed.getName());
-				feedNode.setAttribute("interval", String.valueOf(feed.getInterval()));
-				documentElement.appendChild(feedNode);
-			}
-			document.appendChild(documentElement);
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			Result output = new StreamResult(feedFile);
-			Source input = new DOMSource(document);
-			transformer.transform(input, output);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
 	public void notifyCanvas(Context context) {
-		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_HEADLINES, context);
+		PebbleCanvasPlugin.notify_canvas_updates_available(CanvasRSSPlugin.ID_RSSITEM, context);
 	}
 
 }

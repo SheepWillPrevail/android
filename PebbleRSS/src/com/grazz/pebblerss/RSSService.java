@@ -17,7 +17,7 @@ import com.grazz.pebblerss.feed.FeedManager;
 
 public class RSSService extends Service {
 
-	private FeedManager _feedManager = new FeedManager();
+	private FeedManager _feedManager;
 
 	public class RSSServiceBinder extends Binder {
 		RSSService getService() {
@@ -34,6 +34,7 @@ public class RSSService extends Service {
 	private TimerTask _canvasTask;
 
 	public RSSService() {
+		_feedManager = new FeedManager(this);
 		_receiver = new RSSDataReceiver(this);
 		_ackReceiver = new PebbleAckReceiver(StaticValues.APP_UUID) {
 			@Override
@@ -57,7 +58,7 @@ public class RSSService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		_feedManager.readConfig(this);
+		_feedManager.convertOldConfig(this);
 		PebbleKit.registerReceivedAckHandler(this, _ackReceiver);
 		PebbleKit.registerReceivedNackHandler(this, _nackReceiver);
 	}
@@ -72,9 +73,9 @@ public class RSSService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent != null && intent.hasExtra(PassiveRSSDataReceiver.INTENT))
-			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.INTENT));
-		if (intent != null && intent.hasExtra(CanvasRSSPlugin.START_FEED_POLLING) && isCanvasEnabled())
+		if (intent.hasExtra(PassiveRSSDataReceiver.DATA))
+			_receiver.onReceive(this, (Intent) intent.getExtras().get(PassiveRSSDataReceiver.DATA));
+		if (intent.hasExtra(CanvasRSSPlugin.PLUGINSTART) && isCanvasEnabled())
 			setCanvasEnabled(true);
 		return super.onStartCommand(intent, flags, startId);
 	}
@@ -94,15 +95,20 @@ public class RSSService extends Service {
 
 	public void setCanvasEnabled(Boolean enabled) {
 		if (enabled) {
-			_canvasTask = new TimerTask() {
-				@Override
-				public void run() {
-					if (_feedManager.checkStaleFeeds(RSSService.this, true))
-						_feedManager.notifyCanvas(RSSService.this);
-				}
-			};
-			_timer.schedule(_canvasTask, 0, 60 * 1000);
-		} else if (_canvasTask != null)
+			if (_canvasTask == null) {
+				_canvasTask = new TimerTask() {
+					@Override
+					public void run() {
+						if (_feedManager.checkFeeds(true))
+							_feedManager.notifyCanvas(RSSService.this);
+					}
+				};
+				_timer.schedule(_canvasTask, 0, 60 * 1000);
+			}
+		} else if (_canvasTask != null) {
 			_canvasTask.cancel();
+			_canvasTask = null;
+		}
 	}
+
 }

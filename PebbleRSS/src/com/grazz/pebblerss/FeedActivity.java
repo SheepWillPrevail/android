@@ -23,9 +23,9 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.grazz.pebblerss.feed.Feed;
 import com.grazz.pebblerss.feed.FeedManager;
 import com.grazz.pebblerss.feed.FeedProbe;
+import com.grazz.pebblerss.provider.RSSFeed;
 
 public class FeedActivity extends RSSServiceActivity {
 
@@ -33,9 +33,8 @@ public class FeedActivity extends RSSServiceActivity {
 	private EditText _name;
 	private EditText _interval;
 	private int _feedAction;
-	private int _feedId;
+	private long _feedId;
 	private Boolean _isValidFeed = false;
-	private Boolean _isViaShare = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,23 +102,20 @@ public class FeedActivity extends RSSServiceActivity {
 				return false;
 			}
 			Integer scaledinterval = Integer.valueOf(interval);
-			if (_feedAction == Feed.FEED_ADD) {
-				Feed feed = feedManager.addFeed(Uri.parse(_url.getText().toString()));
-				feed.setName(_name.getText().toString());
-				feed.setInterval(scaledinterval);
+			if (_feedAction == RSSFeed.FEED_ADD) {
+				feedManager.addFeed(Uri.parse(_url.getText().toString()), _name.getText().toString(), scaledinterval);
 			} else {
-				Feed feed = feedManager.getFeed(_feedId);
-				feed.setLink(Uri.parse(_url.getText().toString()));
+				RSSFeed feed = feedManager.getFeedById(_feedId);
+				feed.setUri(Uri.parse(_url.getText().toString()));
 				feed.setName(_name.getText().toString());
 				feed.setInterval(scaledinterval);
+				feed.save(this);
 			}
-			if (_isViaShare)
-				feedManager.writeConfig(this);
 			finish();
 			return true;
 		case R.id.action_delete:
-			if (_feedAction == Feed.FEED_EDIT)
-				feedManager.removeFeed(_feedId);
+			if (_feedAction == RSSFeed.FEED_EDIT)
+				feedManager.removeFeed(feedManager.getFeedById(_feedId));
 			finish();
 			return true;
 		}
@@ -129,15 +125,15 @@ public class FeedActivity extends RSSServiceActivity {
 	@Override
 	protected void onBindToService() {
 		Intent intent = getIntent();
-		_feedAction = intent.getExtras().getInt(Feed.FEED_ACTION);
+		_feedAction = intent.getExtras().getInt(RSSFeed.FEED_ACTION);
 		switch (_feedAction) {
-		case Feed.FEED_ADD:
+		case RSSFeed.FEED_ADD:
 			_interval.setText("30");
 			break;
-		case Feed.FEED_EDIT:
-			_feedId = intent.getExtras().getInt(Feed.FEED_ID);
-			Feed feed = getRSSService().getFeedManager().getFeed(_feedId);
-			_url.setText(feed.getLink().toString());
+		case RSSFeed.FEED_EDIT:
+			_feedId = intent.getExtras().getLong(RSSFeed.FEED_ID);
+			RSSFeed feed = getRSSService().getFeedManager().getFeedById(_feedId);
+			_url.setText(feed.getUri().toString());
 			_name.setText(feed.getName());
 			_interval.setText(String.valueOf(feed.getInterval()));
 			_isValidFeed = true;
@@ -187,7 +183,6 @@ public class FeedActivity extends RSSServiceActivity {
 				Item item = clipData.getItemAt(0);
 				if (item != null)
 					_url.setText(item.getText());
-				_isViaShare = true;
 			}
 		}
 	}

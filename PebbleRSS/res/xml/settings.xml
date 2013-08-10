@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <PreferenceCategory android:title="@string/setting_section_db" >
+        <EditTextPreference
+            android:defaultValue="24"
+            android:dialogMessage="@string/setting_message_retention"
+            android:inputType="number"
+            android:key="@string/setting_retention"
+            android:title="@string/setting_title_retention" >
+        </EditTextPreference>
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/setting_section_pebble" >
+        <EditTextPreference
+            android:defaultValue="30"
+            android:inputType="number"
+            android:key="@string/setting_cellheight"
+            android:title="@string/setting_title_cellheight" >
+        </EditTextPreference>
+
         <ListPreference
             android:defaultValue="5"
             android:entries="@array/setting_fonts"
@@ -24,7 +40,7 @@
             android:title="@string/setting_title_messagefont" >
         </ListPreference>
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/setting_section_canvas" >
+    <PreferenceCategory android:title="@string/setting_section_canvasplugin" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="@string/setting_enablecanvas"

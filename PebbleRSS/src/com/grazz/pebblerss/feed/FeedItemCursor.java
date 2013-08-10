@@ -1,16 +1,23 @@
 package com.grazz.pebblerss.feed;
 
 import java.util.BitSet;
+import java.util.List;
+
+import android.content.Context;
+
+import com.grazz.pebblerss.provider.RSSFeed;
+import com.grazz.pebblerss.provider.RSSFeedItem;
+import com.grazz.pebblerss.provider.RSSFeedItemTable;
 
 public class FeedItemCursor {
 
-	private Feed _feed;
+	private List<RSSFeedItem> _items;
 	private BitSet _sentItems;
 	private int _index = 0;
 
-	public FeedItemCursor(Feed feed) {
-		_feed = feed;
-		_sentItems = new BitSet(_feed.getItems().size());
+	public FeedItemCursor(Context context, RSSFeed feed) {
+		_items = new RSSFeedItemTable(context).getFeedItems(feed);
+		_sentItems = new BitSet(_items.size());
 	}
 
 	public int getPosition() {
@@ -18,7 +25,7 @@ public class FeedItemCursor {
 	}
 
 	public int getTotal() {
-		int total = _feed.getItems().size();
+		int total = _items.size();
 		if (total > 128)
 			total = 128;
 		return total;
@@ -28,10 +35,14 @@ public class FeedItemCursor {
 		return ((_index + 1) > getTotal()) || _index > 127; // clamp
 	}
 
-	public FeedItem getNextItem() {
-		if (!_feed.getItems().isEmpty() && !isDone()) {
+	public RSSFeedItem getItem(int index) {
+		return _items.get(index);
+	}
+
+	public RSSFeedItem getNextItem() {
+		if (!_items.isEmpty() && !isDone()) {
 			int i = _sentItems.nextClearBit(_index);
-			FeedItem item = _feed.getItems().get(i);
+			RSSFeedItem item = _items.get(i);
 			_sentItems.set(i);
 			_index++;
 			return item;

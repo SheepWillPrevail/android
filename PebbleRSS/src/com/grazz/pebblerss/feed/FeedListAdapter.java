@@ -1,5 +1,6 @@
 package com.grazz.pebblerss.feed;
 
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -8,13 +9,16 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.grazz.pebblerss.R;
+import com.grazz.pebblerss.provider.RSSFeed;
 
 public class FeedListAdapter implements ListAdapter {
 
+	private Context _context;
 	private FeedManager _manager;
 	private OnLongClickListener _listener;
 
-	public FeedListAdapter(FeedManager manager, OnLongClickListener listener) {
+	public FeedListAdapter(Context context, FeedManager manager, OnLongClickListener listener) {
+		_context = context;
 		_manager = manager;
 		_listener = listener;
 	}
@@ -43,12 +47,12 @@ public class FeedListAdapter implements ListAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			convertView = View.inflate(parent.getContext(), R.layout.cell_feed, null);
-			Feed feed = _manager.getFeed(position);
+			RSSFeed feed = _manager.getFeed(position);
 			TextView tvFeedName = (TextView) convertView.findViewById(R.id.tvFeedName);
 			tvFeedName.setText(feed.getName());
 			TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
-			tvFeedInfo.setText(String.format("%d items", feed.getItems().size()));
-			convertView.setTag(Integer.valueOf(position));
+			tvFeedInfo.setText(String.format("%d items", feed.getItems(_context).size()));
+			convertView.setTag(feed.getId());
 			convertView.setOnLongClickListener(_listener);
 		}
 		return convertView;

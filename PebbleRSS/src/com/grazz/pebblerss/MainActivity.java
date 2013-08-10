@@ -23,9 +23,9 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.grazz.pebblerss.feed.Feed;
 import com.grazz.pebblerss.feed.FeedListAdapter;
 import com.grazz.pebblerss.feed.FeedManager;
+import com.grazz.pebblerss.provider.RSSFeed;
 
 public class MainActivity extends RSSServiceActivity {
 
@@ -40,11 +40,9 @@ public class MainActivity extends RSSServiceActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		RSSService service = getRSSService();
+		FeedManager feedManager = service.getFeedManager();
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			FeedManager feedManager = service.getFeedManager();
-			feedManager.writeConfig(this);
-			feedManager.notifyCanvas(this);
 			refreshStaleFeeds(feedManager);
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
@@ -52,6 +50,7 @@ public class MainActivity extends RSSServiceActivity {
 			break;
 		case ID_ACTIVITY_SETTINGS:
 			service.setCanvasEnabled(service.isCanvasEnabled());
+			refreshStaleFeeds(feedManager);
 			break;
 		}
 	}
@@ -81,7 +80,7 @@ public class MainActivity extends RSSServiceActivity {
 				return true;
 			}
 			Intent intent = new Intent(this, FeedActivity.class);
-			intent.putExtra(Feed.FEED_ACTION, Feed.FEED_ADD);
+			intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_ADD);
 			startActivityForResult(intent, ID_ACTIVITY_FEED);
 			return true;
 		case R.id.action_about:
@@ -103,15 +102,15 @@ public class MainActivity extends RSSServiceActivity {
 			@Override
 			public boolean onLongClick(View v) {
 				Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
-				intent.putExtra(Feed.FEED_ACTION, Feed.FEED_EDIT);
-				intent.putExtra(Feed.FEED_ID, (Integer) v.getTag());
+				intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_EDIT);
+				intent.putExtra(RSSFeed.FEED_ID, (Long) v.getTag());
 				startActivityForResult(intent, ID_ACTIVITY_FEED);
 				return true;
 			}
 		};
 
 		FeedManager manager = getRSSService().getFeedManager();
-		_lvFeeds.setAdapter(new FeedListAdapter(manager, listener));
+		_lvFeeds.setAdapter(new FeedListAdapter(this, manager, listener));
 		refreshStaleFeeds(manager);
 	}
 
@@ -129,7 +128,7 @@ public class MainActivity extends RSSServiceActivity {
 			@Override
 			public void run() {
 				try {
-					manager.checkStaleFeeds(MainActivity.this, true);
+					manager.checkFeeds(true);
 					refreshFeedView();
 				} catch (ConcurrentModificationException e) {
 				}

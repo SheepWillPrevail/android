@@ -48,6 +48,7 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 				return true;
 			}
 		};
+		findPreference(getResources().getString(R.string.setting_cellheight)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_feedfont)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_itemfont)).setOnPreferenceChangeListener(listener);
 		findPreference(getResources().getString(R.string.setting_messagefont)).setOnPreferenceChangeListener(listener);

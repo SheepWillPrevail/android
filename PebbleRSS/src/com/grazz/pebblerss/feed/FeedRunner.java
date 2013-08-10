@@ -3,42 +3,30 @@ package com.grazz.pebblerss.feed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.content.Context;
 import android.net.Uri;
 
 import com.axelby.riasel.FeedParser;
 import com.axelby.riasel.FeedParser.FeedInfoHandler;
 import com.axelby.riasel.FeedParser.FeedItemHandler;
+import com.grazz.pebblerss.provider.RSSFeed;
+import com.grazz.pebblerss.provider.RSSFeedItem;
+import com.grazz.pebblerss.provider.RSSFeedItemTable;
 
-public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
+public class FeedRunner implements Runnable, FeedInfoHandler, FeedItemHandler {
 
-	public static final int FEED_ADD = 0;
-	public static final int FEED_EDIT = 1;
-	public static final String FEED_ACTION = "feed_action";
-	public static final String FEED_ID = "feed_id";
-
-	private Uri _link;
-	private String _name;
-	private int _refreshInterval;
-
-	private Long _nextUpdate = 0L;
+	private RSSFeed _feed;
 	private Boolean _isParsed = false;
-	private List<FeedItem> _items = new ArrayList<FeedItem>();
+	private RSSFeedItemTable _itemDB;
 
-	public Feed(Uri link, String name, int refreshInterval) {
-		_link = link;
-		_name = name;
-		_refreshInterval = refreshInterval;
-	}
-
-	public Feed(Uri link) {
-		_link = link;
+	public FeedRunner(Context context, RSSFeed feed) {
+		_feed = feed;
+		_itemDB = new RSSFeedItemTable(context);
 	}
 
 	public void doParse() {
@@ -52,46 +40,14 @@ public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 		}
 	}
 
-	public int getInterval() {
-		return _refreshInterval;
-	}
-
-	public String getName() {
-		return _name;
-	}
-
-	public Uri getLink() {
-		return _link;
-	}
-
-	public void setInterval(int interval) {
-		_refreshInterval = interval;
-	}
-
-	public void setName(String name) {
-		_name = name;
-	}
-
-	public void setLink(Uri link) {
-		_link = link;
-	}
-
 	public Boolean isParsed() {
 		return _isParsed;
-	}
-
-	public Boolean isStale() {
-		return System.currentTimeMillis() > _nextUpdate;
-	}
-
-	public List<FeedItem> getItems() {
-		return _items;
 	}
 
 	private synchronized void setIsParsed(Boolean isParsed) {
 		_isParsed = isParsed;
 		if (_isParsed)
-			_nextUpdate = System.currentTimeMillis() + (60 * 1000 * _refreshInterval);
+			_feed.setLastUpdated(System.currentTimeMillis());
 	}
 
 	@Override
@@ -102,11 +58,10 @@ public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 		FeedParser feedparser = null;
 
 		try {
-			_items.clear();
 			factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
 			pullparser = factory.newPullParser();
-			URL url = new URL(_link.toString());
+			URL url = new URL(_feed.getUri().toString());
 			stream = url.openStream();
 			pullparser.setInput(stream, null);
 			feedparser = new FeedParser();
@@ -133,12 +88,20 @@ public class Feed implements Runnable, FeedInfoHandler, FeedItemHandler {
 
 	@Override
 	public void OnFeedInfo(FeedParser feedParser, com.axelby.riasel.Feed feed) {
-		if (_name == null)
-			_name = feed.getTitle();
+		if (_feed.getName() == null)
+			_feed.setName(feed.getTitle());
 	}
 
 	@Override
 	public void OnFeedItem(FeedParser feedParser, com.axelby.riasel.FeedItem item) {
-		_items.add(new FeedItem(item.getTitle(), Uri.parse(item.getLink()), Jsoup.parse(item.getDescription()).text()));
+		if (!_itemDB.hasFeedItem(_feed, item.getPublicationDate())) {
+			RSSFeedItem feedItem = new RSSFeedItem();
+			feedItem.setPublicationDate(item.getPublicationDate());
+			feedItem.setUri(Uri.parse(item.getLink()));
+			feedItem.setTitle(item.getTitle());
+			feedItem.setContent(Jsoup.parse(item.getDescription()).text());
+			_itemDB.addFeedItem(_feed, feedItem);
+		}
 	}
+
 }

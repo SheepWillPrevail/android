@@ -7,5 +7,6 @@ public class StaticValues {
 	public static final String PREFERENCES_KEY = "PebbleRSS";
 	public static final String PREFERENCES_VALUE_PEBBLE_APP_VERSION = "pebbleappversion";
 	public static final String PREFERENCES_VALUE_SEEN_DATA_WARNING = "seendatawarning";
+	public static final String DATABASE_NAME = "pebblerss.db";
 	public static final int PEBBLE_APP_VERSION = 9;
 }
