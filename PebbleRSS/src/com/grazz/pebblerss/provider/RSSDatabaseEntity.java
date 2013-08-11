@@ -1,6 +1,6 @@
 package com.grazz.pebblerss.provider;
 
-public class RSSTableEntity {
+public class RSSDatabaseEntity {
 
 	private long _id;
 

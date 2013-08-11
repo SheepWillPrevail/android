@@ -22,32 +22,20 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 	private int _itemCount = 0;
 
 	public FeedProbe(Uri link) {
-		XmlPullParserFactory factory = null;
-		XmlPullParser pullparser = null;
 		InputStream stream = null;
-		FeedParser feedparser = null;
-
 		try {
-			factory = XmlPullParserFactory.newInstance();
+			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
-			pullparser = factory.newPullParser();
-			URL url = new URL(link.toString());
-			stream = url.openStream();
+			XmlPullParser pullparser = factory.newPullParser();
+			stream = new URL(link.toString()).openStream();
 			pullparser.setInput(stream, null);
-			feedparser = new FeedParser();
+			FeedParser feedparser = new FeedParser();
 			feedparser.setOnFeedInfoHandler(this);
 			feedparser.setOnFeedItemHandler(this);
 			feedparser.parseFeed(pullparser);
-			stream.close();
 			_isParsed = true;
 		} catch (Exception e) {
 		} finally {
-			if (factory != null)
-				factory = null;
-			if (pullparser != null)
-				pullparser = null;
-			if (feedparser != null)
-				feedparser = null;
 			if (stream != null)
 				try {
 					stream.close();

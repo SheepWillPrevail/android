@@ -11,8 +11,6 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import com.getpebble.android.kit.PebbleKit;
-import com.getpebble.android.kit.PebbleKit.PebbleAckReceiver;
-import com.getpebble.android.kit.PebbleKit.PebbleNackReceiver;
 import com.grazz.pebblerss.feed.FeedManager;
 
 public class RSSService extends Service {
@@ -27,27 +25,12 @@ public class RSSService extends Service {
 
 	private RSSServiceBinder _binder = new RSSServiceBinder();
 	private RSSDataReceiver _receiver;
-	private PebbleAckReceiver _ackReceiver;
-	private PebbleNackReceiver _nackReceiver;
-
 	private Timer _timer = new Timer(true);
 	private TimerTask _canvasTask;
 
 	public RSSService() {
 		_feedManager = new FeedManager(this);
 		_receiver = new RSSDataReceiver(this);
-		_ackReceiver = new PebbleAckReceiver(StaticValues.APP_UUID) {
-			@Override
-			public void receiveAck(Context context, int transactionId) {
-				_receiver.ack(transactionId);
-			}
-		};
-		_nackReceiver = new PebbleNackReceiver(StaticValues.APP_UUID) {
-			@Override
-			public void receiveNack(Context context, int transactionId) {
-				_receiver.nack(RSSService.this, transactionId);
-			}
-		};
 	}
 
 	@Override
@@ -59,16 +42,17 @@ public class RSSService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		_feedManager.convertOldConfig(this);
-		PebbleKit.registerReceivedAckHandler(this, _ackReceiver);
-		PebbleKit.registerReceivedNackHandler(this, _nackReceiver);
+		PebbleKit.registerReceivedAckHandler(this, _receiver.getAckReceiver());
+		PebbleKit.registerReceivedNackHandler(this, _receiver.getNackReceiver());
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		_timer.cancel();
-		unregisterReceiver(_ackReceiver);
-		unregisterReceiver(_nackReceiver);
+		unregisterReceiver(_receiver);
+		unregisterReceiver(_receiver.getAckReceiver());
+		unregisterReceiver(_receiver.getNackReceiver());
 	}
 
 	@Override

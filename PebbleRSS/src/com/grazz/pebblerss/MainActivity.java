@@ -44,6 +44,8 @@ public class MainActivity extends RSSServiceActivity {
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
 			refreshStaleFeeds(feedManager);
+			if (service.isCanvasEnabled())
+				feedManager.notifyCanvas(this);
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
 			setWatchAppUpdated();
@@ -75,10 +77,6 @@ public class MainActivity extends RSSServiceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
-			if (getRSSService().getFeedManager().getFeeds().size() > 47) { // clamp
-				Toast.makeText(this, getResources().getString(R.string.error_feed_limit), Toast.LENGTH_LONG).show();
-				return true;
-			}
 			Intent intent = new Intent(this, FeedActivity.class);
 			intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_ADD);
 			startActivityForResult(intent, ID_ACTIVITY_FEED);
@@ -112,6 +110,12 @@ public class MainActivity extends RSSServiceActivity {
 		FeedManager manager = getRSSService().getFeedManager();
 		_lvFeeds.setAdapter(new FeedListAdapter(this, manager, listener));
 		refreshStaleFeeds(manager);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		refreshFeedView();
 	}
 
 	private void refreshFeedView() {

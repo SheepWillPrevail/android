@@ -19,8 +19,7 @@ import com.grazz.pebblerss.CanvasRSSPlugin;
 import com.grazz.pebblerss.R;
 import com.grazz.pebblerss.StaticValues;
 import com.grazz.pebblerss.provider.RSSFeed;
-import com.grazz.pebblerss.provider.RSSFeedItemTable;
-import com.grazz.pebblerss.provider.RSSFeedTable;
+import com.grazz.pebblerss.provider.RSSDatabase;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class FeedManager {
@@ -53,9 +52,7 @@ public class FeedManager {
 		feed.setName(name);
 		feed.setInterval(interval);
 
-		RSSFeedTable db = new RSSFeedTable(_context);
-		db.addFeed(feed);
-		db.close();
+		new RSSDatabase(_context).createFeed(feed);
 
 		notifyCanvas(_context);
 
@@ -63,13 +60,12 @@ public class FeedManager {
 	}
 
 	public void removeFeed(RSSFeed feed) {
-		new RSSFeedTable(_context).removeFeed(feed);
-		new RSSFeedItemTable(_context).deleteFeedItems(feed);
+		new RSSDatabase(_context).deleteFeedItems(feed);
+		new RSSDatabase(_context).deleteFeed(feed);
 		notifyCanvas(_context);
 	}
 
 	public Boolean checkFeeds(Boolean parseIfStale) {
-		RSSFeedItemTable itemTable = new RSSFeedItemTable(_context);
 		SharedPreferences pref = _context.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		int retentionPeriod = Integer.valueOf(pref.getString(_context.getResources().getString(R.string.setting_retention), "24"));
 
@@ -90,7 +86,7 @@ public class FeedManager {
 					wasStale = true;
 				}
 			}
-			itemTable.cleanupExpired(feed, retentionPeriod);
+			new RSSDatabase(_context).cleanupExpired(feed, retentionPeriod);
 		}
 
 		if (doRefresh)
@@ -100,8 +96,7 @@ public class FeedManager {
 	}
 
 	public void convertOldConfig(Context context) {
-		String FEED_CONFIG_XML = "feed_config.xml";
-		File feedFile = new File(context.getFilesDir(), FEED_CONFIG_XML);
+		File feedFile = new File(context.getFilesDir(), "feed_config.xml");
 		if (feedFile.exists()) {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			try {

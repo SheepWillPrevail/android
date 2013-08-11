@@ -46,4 +46,8 @@ public class FeedCursor {
 		} else
 			return null;
 	}
+
+	public FeedItemCursor getItemCursor(Context context, int index) {
+		return new FeedItemCursor(context, getItem(index));
+	}
 }

@@ -19,9 +19,10 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 	public static final String PLUGINSTART = "pluginstart";
 	public static final int ID_RSSITEM = 0;
 
-	private static final String MASK_TITLE = "%rt";
-	private static final String MASK_TIME12 = "%rp";
-	private static final String MASK_TIME24 = "%rP";
+	private static final String MASK_FEEDNAME = "%rn";
+	private static final String MASK_ITEMTITLE = "%rt";
+	private static final String MASK_ITEMTIME12 = "%rp";
+	private static final String MASK_ITEMTIME24 = "%rP";
 	private static final SimpleDateFormat FORMAT_TIME12 = new SimpleDateFormat("h:mma");
 	private static final SimpleDateFormat FORMAT_TIME24 = new SimpleDateFormat("HH:mm");
 
@@ -44,20 +45,24 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 		plugin.format_mask_examples = new ArrayList<String>();
 		plugin.format_masks = new ArrayList<String>();
 
-		plugin.format_mask_descriptions.add("Title");
+		plugin.format_mask_descriptions.add("Feed name");
+		plugin.format_mask_examples.add("Site RSS feed");
+		plugin.format_masks.add(MASK_FEEDNAME);
+
+		plugin.format_mask_descriptions.add("Item title");
 		plugin.format_mask_examples.add("Martians invade earth");
-		plugin.format_masks.add(MASK_TITLE);
+		plugin.format_masks.add(MASK_ITEMTITLE);
 
 		plugin.format_mask_descriptions.add("Publication time (12h)");
 		plugin.format_mask_examples.add("11:59pm");
-		plugin.format_masks.add(MASK_TIME12);
+		plugin.format_masks.add(MASK_ITEMTIME12);
 
 		plugin.format_mask_descriptions.add("Publication time (24h)");
 		plugin.format_mask_examples.add("23:59");
-		plugin.format_masks.add(MASK_TIME24);
+		plugin.format_masks.add(MASK_ITEMTIME24);
 
-		plugin.default_format_string = MASK_TITLE;
-		plugin.params_description = "1-48 (feed) , 1- (item)";
+		plugin.default_format_string = MASK_ITEMTITLE;
+		plugin.params_description = "0- (feed, 0=all) , 1- (item)";
 
 		plugins.add(plugin);
 		return plugins;
@@ -78,28 +83,33 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 			itemId = Integer.parseInt(params[1]);
 		} catch (Exception e) {
 		}
-		if (feedId == null || itemId == null || feedId < 1 || itemId < 1)
+		if (feedId == null || itemId == null || feedId < 0 || itemId < 1)
 			return empty;
 
 		List<RSSFeed> feeds = RSSFeed.getFeeds(context);
 		if (feedId > feeds.size())
 			return empty;
 
-		RSSFeed feed = feeds.get(feedId - 1);
-
-		List<RSSFeedItem> items = feed.getItems(context);
+		List<RSSFeedItem> items;
+		if (feedId == 0)
+			items = RSSFeedItem.getAllFeedItems(context);
+		else
+			items = feeds.get(feedId - 1).getItems(context);
 		if (itemId > items.size())
 			return empty;
 
 		RSSFeedItem item = items.get(itemId - 1);
 
-		if (MASK_TITLE.equals(format_mask))
+		if (MASK_FEEDNAME.equals(format_mask))
+			return item.getFeed(context).getName();
+
+		if (MASK_ITEMTITLE.equals(format_mask))
 			return item.getTitle();
 
-		if (MASK_TIME12.equals(format_mask))
+		if (MASK_ITEMTIME12.equals(format_mask))
 			return FORMAT_TIME12.format(item.getPublicationDate()).toLowerCase();
 
-		if (MASK_TIME24.equals(format_mask))
+		if (MASK_ITEMTIME24.equals(format_mask))
 			return FORMAT_TIME24.format(item.getPublicationDate()).toLowerCase();
 
 		return empty;

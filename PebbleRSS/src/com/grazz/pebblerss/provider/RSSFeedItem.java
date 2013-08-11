@@ -1,10 +1,12 @@
 package com.grazz.pebblerss.provider;
 
 import java.util.Date;
+import java.util.List;
 
+import android.content.Context;
 import android.net.Uri;
 
-public class RSSFeedItem extends RSSTableEntity {
+public class RSSFeedItem extends RSSDatabaseEntity {
 
 	private String _uniqueId;
 	private Date _publicationDate;
@@ -50,6 +52,14 @@ public class RSSFeedItem extends RSSTableEntity {
 
 	public void setContent(String content) {
 		_content = content;
+	}
+
+	public RSSFeed getFeed(Context context) {
+		return new RSSDatabase(context).getFeedOf(this);
+	}
+
+	public static List<RSSFeedItem> getAllFeedItems(Context context) {
+		return new RSSDatabase(context).readAllFeedItems();
 	}
 
 }

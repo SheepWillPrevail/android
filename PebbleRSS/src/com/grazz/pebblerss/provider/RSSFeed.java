@@ -5,7 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.net.Uri;
 
-public class RSSFeed extends RSSTableEntity {
+public class RSSFeed extends RSSDatabaseEntity {
 
 	public static final int FEED_ADD = 0;
 	public static final int FEED_EDIT = 1;
@@ -54,15 +54,15 @@ public class RSSFeed extends RSSTableEntity {
 	}
 
 	public void save(Context context) {
-		new RSSFeedTable(context).updateFeed(this);
+		new RSSDatabase(context).updateFeed(this);
 	}
 
 	public List<RSSFeedItem> getItems(Context context) {
-		return new RSSFeedItemTable(context).getFeedItems(this);
+		return new RSSDatabase(context).readFeedItems(this);
 	}
 
 	public static List<RSSFeed> getFeeds(Context context) {
-		return new RSSFeedTable(context).getFeeds();
+		return new RSSDatabase(context).readFeeds();
 	}
 
 }

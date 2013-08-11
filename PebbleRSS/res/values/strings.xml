@@ -20,7 +20,6 @@
     <string name="button_disagree">I disagree</string>
     <string name="error_feed_invalid">This feed appears to be invalid.</string>
     <string name="error_deploy_watchapp">Unable to write to external memory.</string>
-    <string name="error_feed_limit">Currently no more than 48 feeds are supported.</string>
     <string name="setting_section_db">Feed storage</string>
     <string name="setting_section_pebble">Watch app</string>
     <string name="setting_section_canvasplugin">Pebble Canvas plugin</string>
@@ -29,8 +28,8 @@
     <string name="setting_title_feedfont">Feed list font</string>
     <string name="setting_title_itemfont">Feed item list font</string>
     <string name="setting_title_messagefont">Item text font</string>
-    <string name="setting_title_canvas_enabled">Background refresh enabled</string>
-    <string name="setting_title_canvas_disabled">Background refresh disabled</string>
+    <string name="setting_title_canvas_enabled">Background feed refresh enabled</string>
+    <string name="setting_title_canvas_disabled">Background feed refresh disabled</string>
     <string name="setting_message_retention">Period in hours, since last update of the feed.</string>
     <string name="setting_retention">retention</string>
     <string name="setting_cellheight">cellheight</string>
