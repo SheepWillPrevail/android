@@ -41,9 +41,8 @@ public class FeedItemCursor {
 	public RSSFeedItem getNextItem() {
 		if (!isDone()) {
 			int index = _sentItems.nextClearBit(_index++);
-			RSSFeedItem item = getItem(index);
 			_sentItems.set(index);
-			return item;
+			return getItem(index);
 		} else
 			return null;
 	}

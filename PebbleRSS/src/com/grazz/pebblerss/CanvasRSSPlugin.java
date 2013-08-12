@@ -72,6 +72,9 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 	protected String get_format_mask_value(int def_id, String format_mask, Context context, String param) {
 		String empty = "";
 
+		if (param == null)
+			return empty;
+
 		String[] params = param.split(",");
 		if (params.length < 2)
 			return empty;

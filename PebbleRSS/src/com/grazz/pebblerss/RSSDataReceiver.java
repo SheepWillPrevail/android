@@ -23,7 +23,7 @@ import com.grazz.pebblerss.provider.RSSFeedItem;
 public class RSSDataReceiver extends PebbleDataReceiver {
 
 	private static final int MAX_LENGTH = 90;
-	private static final int MAX_RETRY = 3;
+	private static final int MAX_RETRY = 9;
 
 	private RSSService _service;
 	private ArrayDeque<PebbleDictionary> _msgQueue = new ArrayDeque<PebbleDictionary>();
