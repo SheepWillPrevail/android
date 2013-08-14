@@ -50,7 +50,6 @@ public class RSSService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		_timer.cancel();
-		unregisterReceiver(_receiver);
 		unregisterReceiver(_receiver.getAckReceiver());
 		unregisterReceiver(_receiver.getNackReceiver());
 	}

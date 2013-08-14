@@ -35,6 +35,7 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 			feedparser.parseFeed(pullparser);
 			_isParsed = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			if (stream != null)
 				try {

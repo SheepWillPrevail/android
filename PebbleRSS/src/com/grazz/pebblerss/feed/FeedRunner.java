@@ -64,6 +64,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			feedparser.parseFeed(pullparser);
 			setIsParsed(true);
 		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			if (stream != null)
 				try {
@@ -75,9 +76,12 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 
 	@Override
 	public void OnFeedItem(FeedParser feedParser, FeedItem item) {
-		if (_database.wantsFeedItem(_feed, item.getUniqueId(), item.getPublicationDate())) {
+		String uniqueId = item.getUniqueId();
+		if (uniqueId == null)
+			uniqueId = item.getLink();
+		if (_database.wantsFeedItem(_feed, uniqueId, item.getPublicationDate())) {
 			RSSFeedItem feedItem = new RSSFeedItem();
-			feedItem.setUniqueId(item.getUniqueId());
+			feedItem.setUniqueId(uniqueId);
 			feedItem.setPublicationDate(item.getPublicationDate());
 			feedItem.setUri(Uri.parse(item.getLink()));
 			feedItem.setTitle(item.getTitle());

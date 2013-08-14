@@ -46,7 +46,7 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 		plugin.format_masks = new ArrayList<String>();
 
 		plugin.format_mask_descriptions.add("Feed name");
-		plugin.format_mask_examples.add("Site RSS feed");
+		plugin.format_mask_examples.add("World News");
 		plugin.format_masks.add(MASK_FEEDNAME);
 
 		plugin.format_mask_descriptions.add("Item title");
@@ -54,11 +54,11 @@ public class CanvasRSSPlugin extends PebbleCanvasPlugin {
 		plugin.format_masks.add(MASK_ITEMTITLE);
 
 		plugin.format_mask_descriptions.add("Publication time (12h)");
-		plugin.format_mask_examples.add("11:59pm");
+		plugin.format_mask_examples.add("1:59pm");
 		plugin.format_masks.add(MASK_ITEMTIME12);
 
 		plugin.format_mask_descriptions.add("Publication time (24h)");
-		plugin.format_mask_examples.add("23:59");
+		plugin.format_mask_examples.add("13:59");
 		plugin.format_masks.add(MASK_ITEMTIME24);
 
 		plugin.default_format_string = MASK_ITEMTITLE;
