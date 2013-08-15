@@ -17,22 +17,22 @@ import android.net.Uri;
 
 import com.grazz.pebblerss.CanvasRSSPlugin;
 import com.grazz.pebblerss.R;
+import com.grazz.pebblerss.RSSService;
 import com.grazz.pebblerss.StaticValues;
 import com.grazz.pebblerss.provider.RSSFeed;
-import com.grazz.pebblerss.provider.RSSDatabase;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class FeedManager {
 
-	private Context _context;
+	private RSSService _service;
 	private Boolean _isRefreshingFeeds = false;
 
-	public FeedManager(Context context) {
-		_context = context;
+	public FeedManager(RSSService service) {
+		_service = service;
 	}
 
 	public List<RSSFeed> getFeeds() {
-		return RSSFeed.getFeeds(_context);
+		return RSSFeed.getFeeds(_service);
 	}
 
 	public RSSFeed getFeed(int index) {
@@ -52,22 +52,20 @@ public class FeedManager {
 		feed.setName(name);
 		feed.setInterval(interval);
 
-		new RSSDatabase(_context).createFeed(feed);
-
-		notifyCanvas(_context);
+		RSSFeed.createFeed(_service, feed);
+		notifyCanvas(_service);
 
 		return feed;
 	}
 
 	public void removeFeed(RSSFeed feed) {
-		new RSSDatabase(_context).deleteFeedItems(feed);
-		new RSSDatabase(_context).deleteFeed(feed);
-		notifyCanvas(_context);
+		RSSFeed.deleteFeed(_service, feed);
+		notifyCanvas(_service);
 	}
 
 	public Boolean checkFeeds(Boolean parseIfStale) {
-		SharedPreferences pref = _context.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
-		int retentionPeriod = Integer.valueOf(pref.getString(_context.getResources().getString(R.string.setting_retention), "24"));
+		SharedPreferences pref = _service.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
+		int retentionPeriod = Integer.valueOf(pref.getString(_service.getResources().getString(R.string.setting_retention), "24"));
 
 		Boolean doRefresh = false;
 		synchronized (this) {
@@ -77,16 +75,19 @@ public class FeedManager {
 			}
 		}
 
+		int count = 0;
 		Boolean wasStale = false;
 		for (RSSFeed feed : getFeeds()) {
 			if (feed.isStale()) {
 				if (doRefresh && parseIfStale) {
-					new FeedRunner(_context, feed).doParse();
-					feed.save(_context);
+					if (count++ == 0)
+						_service.sendIsParsingPacket();
+					new FeedRunner(_service, feed).doParse();
+					feed.persist(_service);
 					wasStale = true;
 				}
 			}
-			new RSSDatabase(_context).cleanupExpired(feed, retentionPeriod);
+			RSSFeed.cleanupFeedItems(_service, feed, retentionPeriod);
 		}
 
 		if (doRefresh)

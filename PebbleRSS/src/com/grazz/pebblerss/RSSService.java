@@ -73,6 +73,10 @@ public class RSSService extends Service {
 		_receiver.sendFontPacket(this);
 	}
 
+	public void sendIsParsingPacket() {
+		_receiver.sendInRefreshPacket(this);
+	}
+
 	public Boolean isCanvasEnabled() {
 		SharedPreferences preferences = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		return preferences.getBoolean(getResources().getString(R.string.setting_enablecanvas), true);

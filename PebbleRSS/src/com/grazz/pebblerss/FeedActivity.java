@@ -96,20 +96,22 @@ public class FeedActivity extends RSSServiceActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.action_save:
-			String interval = _interval.getText().toString();
-			if (!_isValidFeed || interval.length() == 0) {
+			String intervalText = _interval.getText().toString();
+			if (!_isValidFeed || intervalText.length() == 0) {
 				Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG).show();
 				return false;
 			}
-			Integer scaledinterval = Integer.valueOf(interval);
+			Uri uri = Uri.parse(_url.getText().toString());
+			String name = _name.getText().toString();
+			Integer interval = Integer.valueOf(intervalText);
 			if (_feedAction == RSSFeed.FEED_ADD) {
-				feedManager.addFeed(Uri.parse(_url.getText().toString()), _name.getText().toString(), scaledinterval);
+				feedManager.addFeed(uri, name, interval);
 			} else {
 				RSSFeed feed = feedManager.getFeedById(_feedId);
-				feed.setUri(Uri.parse(_url.getText().toString()));
-				feed.setName(_name.getText().toString());
-				feed.setInterval(scaledinterval);
-				feed.save(this);
+				feed.setUri(uri);
+				feed.setName(name);
+				feed.setInterval(interval);
+				feed.persist(this);
 			}
 			finish();
 			return true;
@@ -150,7 +152,7 @@ public class FeedActivity extends RSSServiceActivity {
 						public void run() {
 							final FeedProbe probe = new FeedProbe(Uri.parse(url));
 							_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
-							if (probe.isParsed())
+							if (_isValidFeed)
 								runOnUiThread(new Runnable() {
 									@Override
 									public void run() {

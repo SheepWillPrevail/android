@@ -102,19 +102,18 @@ public class RSSDatabase extends SQLiteOpenHelper {
 				+ FEEDITEM_COLUMN_FEED_ID + " from " + FEEDITEM_TABLE_NAME + " where " + FEEDITEM_COLUMN_UNIQUE_ID + " = ?)");
 		statement.bindString(1, item.getUniqueId());
 		long feedId = statement.simpleQueryForLong();
+		statement.close();
 
 		Cursor cursor = db.query(FEED_TABLE_NAME, new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
 				FEED_COLUMN_LAST_UPDATE }, FEED_COLUMN_ID + "=?", new String[] { String.valueOf(feedId) }, null, null, null);
-		try {
-			if (cursor != null && cursor.moveToNext()) {
-				feed = new RSSFeed();
-				feed.setId(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_ID)));
-				feed.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_URI))));
-				feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
-				feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
-				feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
-			}
-		} finally {
+
+		if (cursor != null && cursor.moveToNext()) {
+			feed = new RSSFeed();
+			feed.setId(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_ID)));
+			feed.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_URI))));
+			feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
+			feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
+			feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
 			cursor.close();
 		}
 
@@ -128,19 +127,16 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query(FEED_TABLE_NAME, new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
 				FEED_COLUMN_LAST_UPDATE }, null, null, null, null, FEED_COLUMN_ID + " ASC");
 
-		try {
-			if (cursor != null) {
-				while (cursor.moveToNext()) {
-					RSSFeed feed = new RSSFeed();
-					feed.setId(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_ID)));
-					feed.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_URI))));
-					feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
-					feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
-					feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
-					feeds.add(feed);
-				}
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				RSSFeed feed = new RSSFeed();
+				feed.setId(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_ID)));
+				feed.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_URI))));
+				feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
+				feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
+				feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
+				feeds.add(feed);
 			}
-		} finally {
 			cursor.close();
 		}
 		db.close();
@@ -154,24 +150,21 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query(FEEDITEM_TABLE_NAME, new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_UNIQUE_ID, FEEDITEM_COLUMN_PUBLICATION_DATE,
 				FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT }, null, null, null, null, FEEDITEM_COLUMN_PUBLICATION_DATE + " DESC");
 
-		try {
-			if (cursor != null) {
-				while (cursor.moveToNext()) {
-					RSSFeedItem item = new RSSFeedItem();
-					item.setId(cursor.getInt(cursor.getColumnIndex(FEEDITEM_COLUMN_ID)));
-					item.setUniqueId(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_UNIQUE_ID)));
-					item.setPublicationDate(new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE))));
-					item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
-					item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
-					item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
-					items.add(item);
-				}
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				RSSFeedItem item = new RSSFeedItem();
+				item.setId(cursor.getInt(cursor.getColumnIndex(FEEDITEM_COLUMN_ID)));
+				item.setUniqueId(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_UNIQUE_ID)));
+				item.setPublicationDate(new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE))));
+				item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
+				item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
+				item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
+				items.add(item);
 			}
-		} finally {
 			cursor.close();
 		}
-		db.close();
 
+		db.close();
 		return items;
 	}
 
@@ -182,24 +175,21 @@ public class RSSDatabase extends SQLiteOpenHelper {
 				FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT }, FEEDITEM_COLUMN_FEED_ID + "=?",
 				new String[] { String.valueOf(feed.getId()) }, null, null, FEEDITEM_COLUMN_PUBLICATION_DATE + " DESC");
 
-		try {
-			if (cursor != null) {
-				while (cursor.moveToNext()) {
-					RSSFeedItem item = new RSSFeedItem();
-					item.setId(cursor.getInt(cursor.getColumnIndex(FEEDITEM_COLUMN_ID)));
-					item.setUniqueId(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_UNIQUE_ID)));
-					item.setPublicationDate(new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE))));
-					item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
-					item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
-					item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
-					items.add(item);
-				}
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				RSSFeedItem item = new RSSFeedItem();
+				item.setId(cursor.getInt(cursor.getColumnIndex(FEEDITEM_COLUMN_ID)));
+				item.setUniqueId(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_UNIQUE_ID)));
+				item.setPublicationDate(new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE))));
+				item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
+				item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
+				item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
+				items.add(item);
 			}
-		} finally {
 			cursor.close();
 		}
-		db.close();
 
+		db.close();
 		return items;
 	}
 
@@ -242,25 +232,22 @@ public class RSSDatabase extends SQLiteOpenHelper {
 				+ "=? and " + FEEDITEM_COLUMN_UNIQUE_ID + "=?", new String[] { String.valueOf(feed.getId()), uniqueId }, null, null, null);
 
 		Boolean wanted = true;
-		try {
-			if (cursor != null) {
-				wanted = !cursor.moveToNext();
-				if (!wanted) {
-					Date foundDate = new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE)));
-					if (publicationDate.after(foundDate)) {
-						SQLiteDatabase writeDb = getWritableDatabase();
-						writeDb.delete(FEEDITEM_TABLE_NAME, FEEDITEM_COLUMN_FEED_ID + "=? and " + FEEDITEM_COLUMN_UNIQUE_ID + "=?",
-								new String[] { String.valueOf(feed.getId()), uniqueId });
-						writeDb.close();
-						wanted = true;
-					}
+		if (cursor != null) {
+			wanted = !cursor.moveToNext();
+			if (!wanted) {
+				Date foundDate = new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE)));
+				if (publicationDate.after(foundDate)) {
+					SQLiteDatabase writeDb = getWritableDatabase();
+					writeDb.delete(FEEDITEM_TABLE_NAME, FEEDITEM_COLUMN_FEED_ID + "=? and " + FEEDITEM_COLUMN_UNIQUE_ID + "=?",
+							new String[] { String.valueOf(feed.getId()), uniqueId });
+					writeDb.close();
+					wanted = true;
 				}
 			}
-		} finally {
 			cursor.close();
 		}
-		db.close();
 
+		db.close();
 		return wanted;
 	}
 

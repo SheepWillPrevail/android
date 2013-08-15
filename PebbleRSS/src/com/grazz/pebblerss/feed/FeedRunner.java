@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.NodeVisitor;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -14,9 +16,9 @@ import android.net.Uri;
 import com.axelby.riasel.FeedItem;
 import com.axelby.riasel.FeedParser;
 import com.axelby.riasel.FeedParser.FeedItemHandler;
+import com.grazz.pebblerss.provider.RSSDatabase;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
-import com.grazz.pebblerss.provider.RSSDatabase;
 
 public class FeedRunner implements Runnable, FeedItemHandler {
 
@@ -85,8 +87,30 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			feedItem.setPublicationDate(item.getPublicationDate());
 			feedItem.setUri(Uri.parse(item.getLink()));
 			feedItem.setTitle(item.getTitle());
-			feedItem.setContent(Jsoup.parse(item.getDescription()).text());
+
+			final StringBuilder filtered = new StringBuilder();
+			Jsoup.parse(item.getDescription()).traverse(new NodeVisitor() {
+				@Override
+				public void head(Node node, int depth) {
+					if ("#text".equalsIgnoreCase(node.nodeName()))
+						filtered.append(Jsoup.parse(node.outerHtml()).text());
+				}
+
+				@Override
+				public void tail(Node node, int depth) {
+					String name = node.nodeName();
+					if ("td".equalsIgnoreCase(name))
+						filtered.append(" ");
+					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name))
+						filtered.append("\n");
+					if ("p".equalsIgnoreCase(name) && node.childNodeSize() > 0)
+						filtered.append("\n\n");
+				}
+			});
+			feedItem.setContent(filtered.toString());
+
 			_database.createFeedItem(_feed, feedItem);
 		}
 	}
+
 }

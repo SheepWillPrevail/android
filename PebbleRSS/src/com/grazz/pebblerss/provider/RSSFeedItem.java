@@ -55,11 +55,17 @@ public class RSSFeedItem extends RSSDatabaseEntity {
 	}
 
 	public RSSFeed getFeed(Context context) {
-		return new RSSDatabase(context).getFeedOf(this);
+		RSSDatabase db = new RSSDatabase(context);
+		RSSFeed feed = db.getFeedOf(this);
+		db.close();
+		return feed;
 	}
 
 	public static List<RSSFeedItem> getAllFeedItems(Context context) {
-		return new RSSDatabase(context).readAllFeedItems();
+		RSSDatabase db = new RSSDatabase(context);
+		List<RSSFeedItem> feedItems = db.readAllFeedItems();
+		db.close();
+		return feedItems;
 	}
 
 }

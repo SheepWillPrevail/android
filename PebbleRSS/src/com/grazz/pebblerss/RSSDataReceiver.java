@@ -1,5 +1,6 @@
 package com.grazz.pebblerss;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 
 import android.content.Context;
@@ -22,14 +23,14 @@ import com.grazz.pebblerss.provider.RSSFeedItem;
 
 public class RSSDataReceiver extends PebbleDataReceiver {
 
-	private static final int MAX_LENGTH = 90;
-	private static final int MAX_RETRY = 9;
+	private static final int MAX_TRANSMIT_SIZE = 96;
+	private static final int MAX_RETRY = 8;
 
 	private RSSService _service;
 	private ArrayDeque<PebbleDictionary> _msgQueue = new ArrayDeque<PebbleDictionary>();
 	private SparseArray<PebbleDictionary> _msgSent = new SparseArray<PebbleDictionary>();
 	private SparseIntArray _msgSentRetry = new SparseIntArray();
-	private int _transactionId = 0;
+	private int _transactionId;
 	private FeedCursor _feedCursor;
 	private FeedItemCursor _feedItemCursor;
 
@@ -43,14 +44,14 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	private PebbleNackReceiver _nackReceiver = new PebbleNackReceiver(StaticValues.APP_UUID) {
 		@Override
 		public void receiveNack(Context context, int transactionId) {
+			Log.d("receiveNack", "TID " + _transactionId);
 			PebbleDictionary dictionary = _msgSent.get(transactionId);
 			if (dictionary != null) {
 				Integer retryCount = _msgSentRetry.get(transactionId) + 1;
 				if (retryCount > MAX_RETRY)
 					return;
-				_msgSentRetry.put(transactionId, retryCount);
 				_msgQueue.push(dictionary);
-				sendData(context);
+				sendData(context, retryCount);
 			}
 		}
 	};
@@ -60,17 +61,26 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		_service = service;
 	}
 
+	private void resetConnectionData(Context context) {
+		_msgQueue.clear();
+		_msgSent.clear();
+		_msgSentRetry.clear();
+		_transactionId = 0;
+		_service.getFeedManager().checkFeeds(true);
+		_feedCursor = new FeedCursor(context);
+	}
+
 	private void queueData(PebbleDictionary dictionary) {
 		Log.d("queueData", dictionary.toJsonString());
 		_msgQueue.add(dictionary);
 	}
 
-	private void sendData(Context context) {
-		if (!_msgQueue.isEmpty()) {
+	private void sendData(Context context, int retryCount) {
+		if (!_msgQueue.isEmpty() && PebbleKit.isWatchConnected(context)) {
 			PebbleDictionary dictionary = _msgQueue.remove();
-			Log.d("sendData", dictionary.toJsonString());
 			_msgSent.put(_transactionId, dictionary);
-			_msgSentRetry.put(_transactionId, Integer.valueOf(0));
+			_msgSentRetry.put(_transactionId, Integer.valueOf(retryCount));
+			Log.d("sendData", "TID " + _transactionId + ": " + dictionary.toJsonString());
 			PebbleKit.sendDataToPebbleWithTransactionId(context, StaticValues.APP_UUID, dictionary, _transactionId);
 			_transactionId = (_transactionId + 1) % 256;
 		}
@@ -85,14 +95,12 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		if (command_id != null)
 			switch (command_id.intValue()) {
 			case 0: // hello
-				_msgSent.clear();
-				_service.getFeedManager().checkFeeds(true);
-				_feedCursor = new FeedCursor(context);
+				resetConnectionData(context);
 				sendFontPacket(context);
 				sendFeed(context);
 				break;
 			case 1: // ack, continue queue
-				sendData(context);
+				sendData(context, 0);
 				break;
 			case 2: // continue feed list
 				if (_feedCursor != null && !_feedCursor.isDone())
@@ -132,7 +140,14 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		dictionary.addUint8(1015, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_messagefont), "0")).byteValue());
 		dictionary.addUint8(1016, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_cellheight), "33")).byteValue());
 		queueData(dictionary);
-		sendData(context);
+		sendData(context, 0);
+	}
+
+	public void sendInRefreshPacket(Context context) {
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(1017, (byte) 0);
+		queueData(dictionary);
+		sendData(context, 0);
 	}
 
 	private void sendFeed(Context context) {
@@ -140,11 +155,11 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		RSSFeed feed = _feedCursor.getNextItem();
 		if (feed != null) {
 			PebbleDictionary feed_dict = new PebbleDictionary();
-			feed_dict.addString(1001, substring(feed.getName(), MAX_LENGTH));
+			feed_dict.addString(1001, substring(feed.getName(), MAX_TRANSMIT_SIZE));
 			feed_dict.addUint8(1011, (byte) _feedCursor.getTotal());
 			feed_dict.addUint8(1012, (byte) position);
 			queueData(feed_dict);
-			sendData(context);
+			sendData(context, 0);
 		}
 	}
 
@@ -153,39 +168,51 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		RSSFeedItem item = _feedItemCursor.getNextItem();
 		if (item != null) {
 			PebbleDictionary item_dict = new PebbleDictionary();
-			item_dict.addString(1002, substring(item.getTitle(), MAX_LENGTH));
-			item_dict.addUint8(1011, (byte) _feedItemCursor.getTotal());
-			item_dict.addUint8(1012, (byte) position);
+			item_dict.addString(1002, substring(item.getTitle(), MAX_TRANSMIT_SIZE));
+			item_dict.addUint8(1021, (byte) _feedItemCursor.getTotal());
+			item_dict.addUint8(1022, (byte) position);
 			queueData(item_dict);
-			sendData(context);
+			sendData(context, 0);
 		}
 	}
 
 	private void sendFeedItemText(Context context, Long item_id) {
 		RSSFeedItem item = _feedItemCursor.getItem(item_id.intValue());
-		String content = item.getContent();
-		int maxParts = 2000 / MAX_LENGTH;
-		int parts = (content.length() + (MAX_LENGTH - 1)) / MAX_LENGTH;
-		if (parts > maxParts)
-			parts = maxParts; // clamp
-		for (int offset = 0; offset < (parts * MAX_LENGTH); offset += MAX_LENGTH) {
-			int length = content.length() - offset;
-			if (length > MAX_LENGTH)
-				length = MAX_LENGTH;
-			PebbleDictionary message_dict = new PebbleDictionary();
-			message_dict.addString(1003, content.substring(offset, offset + length));
-			message_dict.addUint8(1011, (byte) parts);
-			message_dict.addUint16(1012, (short) offset);
-			queueData(message_dict);
+		byte[] content = null;
+		try {
+			content = item.getContent().getBytes("UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		sendData(context);
+		if (content != null) {
+			ByteBuffer buffer = ByteBuffer.allocate(content.length);
+			buffer.put(content);
+			buffer.rewind();
+			int parts = (content.length + (MAX_TRANSMIT_SIZE - 1)) / MAX_TRANSMIT_SIZE;
+			for (int offset = 0; offset < content.length; offset += MAX_TRANSMIT_SIZE) {
+				int length = content.length - offset;
+				if (length > MAX_TRANSMIT_SIZE)
+					length = MAX_TRANSMIT_SIZE;
+				int end = offset + length;
+				if (end > 2048)
+					break;
+				byte[] packet = new byte[length];
+				buffer.get(packet, 0, length);
+				PebbleDictionary message_dict = new PebbleDictionary();
+				message_dict.addBytes(1003, packet);
+				message_dict.addUint8(1031, (byte) parts);
+				message_dict.addUint16(1032, (short) offset);
+				queueData(message_dict);
+			}
+			sendData(context, 0);
+		}
 	}
 
-	private String substring(String str, int maxLength) {
-		int length = str.length();
+	private String substring(String string, int maxLength) {
+		int length = string.length();
 		if (length > maxLength)
 			length = maxLength;
-		return str.substring(0, length);
+		return string.substring(0, length);
 	}
 
 	public PebbleAckReceiver getAckReceiver() {

@@ -14,6 +14,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.getpebble.android.kit.PebbleKit;
 import com.grazz.pebblerss.RSSService.RSSServiceBinder;
 
 public class SettingsActivity extends SherlockPreferenceActivity {
@@ -34,8 +35,10 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		bindService(new Intent(this, RSSService.class), _rssServiceConnection, Context.BIND_AUTO_CREATE);
 		setupActionBar();
+		bindService(new Intent(this, RSSService.class), _rssServiceConnection, Context.BIND_AUTO_CREATE);
+		if (PebbleKit.isWatchConnected(this))
+			PebbleKit.startAppOnPebble(this, StaticValues.APP_UUID);
 
 		getPreferenceManager().setSharedPreferencesMode(Context.MODE_PRIVATE);
 		getPreferenceManager().setSharedPreferencesName(StaticValues.PREFERENCES_KEY);
