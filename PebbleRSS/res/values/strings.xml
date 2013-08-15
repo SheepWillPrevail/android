@@ -37,6 +37,7 @@
     <string name="setting_itemfont">itemfont</string>
     <string name="setting_messagefont">messagefont</string>
     <string name="setting_enablecanvas">enablecanvas</string>
+    <string name="color_feed_id">#808080</string>
 
     <string-array name="setting_fonts">
         <item>Gothic 14</item>

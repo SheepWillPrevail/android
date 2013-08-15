@@ -17,7 +17,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
-import android.view.View.OnLongClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -96,19 +97,21 @@ public class MainActivity extends RSSServiceActivity {
 
 	@Override
 	protected void onBindToService() {
-		OnLongClickListener listener = new OnLongClickListener() {
+		OnItemLongClickListener listener = new OnItemLongClickListener() {
 			@Override
-			public boolean onLongClick(View v) {
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				RSSFeed feed = getRSSService().getFeedManager().getFeedById(id);
 				Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
 				intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_EDIT);
-				intent.putExtra(RSSFeed.FEED_ID, (Long) v.getTag());
+				intent.putExtra(RSSFeed.FEED_ID, feed.getId());
 				startActivityForResult(intent, ID_ACTIVITY_FEED);
 				return true;
 			}
 		};
 
 		FeedManager manager = getRSSService().getFeedManager();
-		_lvFeeds.setAdapter(new FeedListAdapter(this, manager, listener));
+		_lvFeeds.setAdapter(new FeedListAdapter(this, manager));
+		_lvFeeds.setOnItemLongClickListener(listener);
 		refreshStaleFeeds(manager);
 	}
 

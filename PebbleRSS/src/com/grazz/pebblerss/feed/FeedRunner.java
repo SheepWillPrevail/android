@@ -3,6 +3,7 @@ package com.grazz.pebblerss.feed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
@@ -81,10 +82,13 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		String uniqueId = item.getUniqueId();
 		if (uniqueId == null)
 			uniqueId = item.getLink();
-		if (_database.wantsFeedItem(_feed, uniqueId, item.getPublicationDate())) {
+		Date publicationDate = item.getPublicationDate();
+		if (publicationDate == null)
+			publicationDate = new Date();
+		if (_database.wantsFeedItem(_feed, uniqueId, publicationDate)) {
 			RSSFeedItem feedItem = new RSSFeedItem();
 			feedItem.setUniqueId(uniqueId);
-			feedItem.setPublicationDate(item.getPublicationDate());
+			feedItem.setPublicationDate(publicationDate);
 			feedItem.setUri(Uri.parse(item.getLink()));
 			feedItem.setTitle(item.getTitle());
 
@@ -99,9 +103,9 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 				@Override
 				public void tail(Node node, int depth) {
 					String name = node.nodeName();
-					if ("td".equalsIgnoreCase(name))
+					if ("td".equalsIgnoreCase(name) | "dt".equalsIgnoreCase(name))
 						filtered.append(" ");
-					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name))
+					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name))
 						filtered.append("\n");
 					if ("p".equalsIgnoreCase(name) && node.childNodeSize() > 0)
 						filtered.append("\n\n");
