@@ -5,16 +5,7 @@
     android:longClickable="true" >
 
     <TextView
-        android:id="@+id/tvFeedInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvFeedName"
-        android:layout_below="@+id/tvFeedName"
-        android:text="Small Text"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/tvFeedId"
+        android:id="@+id/tvURL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/tvFeedName"
@@ -30,7 +21,18 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="14dp"
+        android:layout_marginRight="14dp"
+        android:layout_toStartOf="@+id/tvURL"
         android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/tvFeedInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvFeedName"
+        android:layout_below="@+id/tvFeedName"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

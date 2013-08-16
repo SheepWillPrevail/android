@@ -12,20 +12,17 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.grazz.pebblerss.CanvasRSSPlugin;
-import com.grazz.pebblerss.R;
 import com.grazz.pebblerss.RSSService;
-import com.grazz.pebblerss.StaticValues;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 
 public class FeedManager {
 
 	private RSSService _service;
-	private Boolean _isRefreshingFeeds = false;
+	private boolean _isRefreshingFeeds = false;
 
 	public FeedManager(RSSService service) {
 		_service = service;
@@ -35,8 +32,8 @@ public class FeedManager {
 		return RSSFeed.getFeeds(_service);
 	}
 
-	public RSSFeed getFeed(int index) {
-		return getFeeds().get(index);
+	public RSSFeed getFeedAt(int position) {
+		return getFeeds().get(position);
 	}
 
 	public RSSFeed getFeedById(long id) {
@@ -46,11 +43,12 @@ public class FeedManager {
 		return null;
 	}
 
-	public RSSFeed addFeed(Uri uri, String name, int interval) {
+	public RSSFeed addFeed(Uri uri, String name, int interval, int retention) {
 		RSSFeed feed = new RSSFeed();
 		feed.setUri(uri);
 		feed.setName(name);
 		feed.setInterval(interval);
+		feed.setRetention(retention);
 
 		RSSFeed.createFeed(_service, feed);
 		notifyCanvas(_service);
@@ -63,11 +61,8 @@ public class FeedManager {
 		notifyCanvas(_service);
 	}
 
-	public Boolean checkFeeds(Boolean parseIfStale) {
-		SharedPreferences pref = _service.getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
-		int retentionPeriod = Integer.valueOf(pref.getString(_service.getResources().getString(R.string.setting_retention), "24"));
-
-		Boolean doRefresh = false;
+	public boolean checkFeeds(boolean parseIfStale) {
+		boolean doRefresh = false;
 		synchronized (this) {
 			if (!_isRefreshingFeeds) {
 				_isRefreshingFeeds = true;
@@ -76,7 +71,7 @@ public class FeedManager {
 		}
 
 		int count = 0;
-		Boolean wasStale = false;
+		boolean wasStale = false;
 		for (RSSFeed feed : getFeeds()) {
 			if (feed.isStale()) {
 				if (doRefresh && parseIfStale) {
@@ -87,7 +82,7 @@ public class FeedManager {
 					wasStale = true;
 				}
 			}
-			RSSFeed.cleanupFeedItems(_service, feed, retentionPeriod);
+			RSSFeed.cleanupFeedItems(_service, feed, feed.getRetention());
 		}
 
 		if (doRefresh)
@@ -113,7 +108,7 @@ public class FeedManager {
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-					addFeed(Uri.parse(link), name, Integer.valueOf(interval));
+					addFeed(Uri.parse(link), name, Integer.valueOf(interval), 24);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

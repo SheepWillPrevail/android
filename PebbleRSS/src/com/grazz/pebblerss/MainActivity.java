@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ConcurrentModificationException;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -41,19 +40,17 @@ public class MainActivity extends RSSServiceActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		RSSService service = getRSSService();
-		FeedManager feedManager = service.getFeedManager();
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			refreshStaleFeeds(feedManager);
 			if (service.isCanvasEnabled())
-				feedManager.notifyCanvas(this);
+				service.getFeedManager().notifyCanvas(this);
+			refreshFeeds();
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
 			setWatchAppUpdated();
 			break;
 		case ID_ACTIVITY_SETTINGS:
 			service.setCanvasEnabled(service.isCanvasEnabled());
-			refreshStaleFeeds(feedManager);
 			break;
 		}
 	}
@@ -82,14 +79,14 @@ public class MainActivity extends RSSServiceActivity {
 			intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_ADD);
 			startActivityForResult(intent, ID_ACTIVITY_FEED);
 			return true;
-		case R.id.action_about:
-			startActivity(new Intent(this, AboutActivity.class));
-			return true;
 		case R.id.action_app:
 			sendAppToWatch();
 			return true;
 		case R.id.action_settings:
 			startActivityForResult(new Intent(this, SettingsActivity.class), ID_ACTIVITY_SETTINGS);
+			return true;
+		case R.id.action_about:
+			startActivity(new Intent(this, AboutActivity.class));
 			return true;
 		}
 		return false;
@@ -97,28 +94,36 @@ public class MainActivity extends RSSServiceActivity {
 
 	@Override
 	protected void onBindToService() {
-		OnItemLongClickListener listener = new OnItemLongClickListener() {
+		final FeedManager manager = getRSSService().getFeedManager();
+		_lvFeeds.setAdapter(new FeedListAdapter(this, manager));
+		_lvFeeds.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				RSSFeed feed = getRSSService().getFeedManager().getFeedById(id);
+				RSSFeed feed = manager.getFeedById(id);
 				Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
 				intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_EDIT);
 				intent.putExtra(RSSFeed.FEED_ID, feed.getId());
 				startActivityForResult(intent, ID_ACTIVITY_FEED);
 				return true;
 			}
-		};
-
-		FeedManager manager = getRSSService().getFeedManager();
-		_lvFeeds.setAdapter(new FeedListAdapter(this, manager));
-		_lvFeeds.setOnItemLongClickListener(listener);
-		refreshStaleFeeds(manager);
+		});
+		refreshFeeds();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		refreshFeedView();
+	}
+
+	private void refreshFeeds() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				getRSSService().getFeedManager().checkFeeds(true);
+				refreshFeedView();
+			}
+		}).start();
 	}
 
 	private void refreshFeedView() {
@@ -130,28 +135,14 @@ public class MainActivity extends RSSServiceActivity {
 		});
 	}
 
-	private void refreshStaleFeeds(final FeedManager manager) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					manager.checkFeeds(true);
-					refreshFeedView();
-				} catch (ConcurrentModificationException e) {
-				}
-			}
-		}).start();
-	}
-
 	private void checkWatchAppUpdate() {
 		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		final Resources resources = getResources();
-
 		int pebbleAppVersion = pref.getInt(StaticValues.PREFERENCES_VALUE_PEBBLE_APP_VERSION, 1);
 		if (pebbleAppVersion < StaticValues.PEBBLE_APP_VERSION) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(resources.getString(R.string.pebble_app_update_title));
-			builder.setMessage(resources.getString(R.string.pebble_app_update_message));
+			builder.setTitle(resources.getString(R.string.watchapp_update_title));
+			builder.setMessage(resources.getString(R.string.watchapp_update_message));
 			builder.setPositiveButton(resources.getString(R.string.button_positive), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -188,7 +179,7 @@ public class MainActivity extends RSSServiceActivity {
 			intent.setDataAndType(Uri.fromFile(file), "application/octet-stream");
 			startActivityForResult(intent, ID_ACTIVITY_UPDATEWATCHAPP);
 		} catch (Exception e) {
-			Toast.makeText(this, getResources().getString(R.string.error_deploy_watchapp), Toast.LENGTH_LONG).show();
+			Toast.makeText(this, getResources().getString(R.string.message_deploy_failed), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -198,4 +189,5 @@ public class MainActivity extends RSSServiceActivity {
 		editor.putInt(StaticValues.PREFERENCES_VALUE_PEBBLE_APP_VERSION, StaticValues.PEBBLE_APP_VERSION);
 		editor.commit();
 	}
+
 }

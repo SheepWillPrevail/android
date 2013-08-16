@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <PreferenceCategory android:title="@string/setting_section_db" >
-        <EditTextPreference
-            android:defaultValue="24"
-            android:dialogMessage="@string/setting_message_retention"
-            android:inputType="number"
-            android:key="@string/setting_retention"
-            android:title="@string/setting_title_retention" >
-        </EditTextPreference>
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/setting_section_pebble" >
+    <PreferenceCategory android:title="@string/setting_section_pebble" >
         <EditTextPreference
             android:defaultValue="33"
             android:inputType="number"

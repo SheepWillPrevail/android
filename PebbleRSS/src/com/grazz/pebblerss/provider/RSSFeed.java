@@ -15,6 +15,7 @@ public class RSSFeed extends RSSDatabaseEntity {
 	private Uri _uri;
 	private String _name;
 	private int _interval;
+	private int _retention;
 	private long _lastUpdated;
 
 	public Uri getUri() {
@@ -41,6 +42,14 @@ public class RSSFeed extends RSSDatabaseEntity {
 		_interval = interval;
 	}
 
+	public int getRetention() {
+		return _retention;
+	}
+
+	public void setRetention(int retention) {
+		_retention = retention;
+	}
+
 	public long getLastUpdated() {
 		return _lastUpdated;
 	}
@@ -49,7 +58,7 @@ public class RSSFeed extends RSSDatabaseEntity {
 		_lastUpdated = lastUpdated;
 	}
 
-	public Boolean isStale() {
+	public boolean isStale() {
 		return System.currentTimeMillis() > getLastUpdated() + (60 * 1000 * getInterval());
 	}
 

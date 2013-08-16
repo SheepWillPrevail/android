@@ -9,21 +9,21 @@
     tools:context=".FeedActivity" >
 
     <TextView
-        android:id="@+id/tvFeedId"
+        android:id="@+id/tvURL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="URL"
+        android:text="@string/feed_title_url"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
         android:id="@+id/etURL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvFeedId"
+        android:layout_alignLeft="@+id/tvURL"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/tvFeedId"
+        android:layout_below="@+id/tvURL"
         android:ems="10"
         android:inputType="textUri" >
 
@@ -31,52 +31,83 @@
     </EditText>
 
     <TextView
-        android:id="@+id/tvAndroidRSS"
+        android:id="@+id/tvFeedName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/etURL"
         android:layout_below="@+id/etURL"
         android:layout_marginTop="16dp"
-        android:text="Feed name"
+        android:text="@string/feed_title_name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
-        android:id="@+id/etFeedName"
+        android:id="@+id/etName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvAndroidRSS"
+        android:layout_alignLeft="@+id/tvFeedName"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/tvAndroidRSS"
-        android:ems="10" />
+        android:layout_below="@+id/tvFeedName"
+        android:ems="10"
+        android:inputType="textNoSuggestions" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvInterval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/etFeedName"
-        android:layout_below="@+id/etFeedName"
+        android:layout_alignLeft="@+id/etName"
+        android:layout_below="@+id/etName"
         android:layout_marginTop="16dp"
-        android:text="Refresh interval"
+        android:text="@string/feed_title_refresh"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
         android:id="@+id/etInterval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignRight="@+id/tvAndroidRSS"
-        android:layout_below="@+id/textView2"
+        android:layout_alignLeft="@+id/tvInterval"
+        android:layout_alignRight="@+id/tvFeedName"
+        android:layout_below="@+id/tvInterval"
         android:ems="10"
         android:inputType="number" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/tvUnitMinutes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/etInterval"
         android:layout_alignBottom="@+id/etInterval"
         android:layout_toRightOf="@+id/etInterval"
-        android:text="minutes"
+        android:text="@string/feed_unit_minutes"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/tvRetention"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/etInterval"
+        android:layout_below="@+id/etInterval"
+        android:layout_marginTop="16dp"
+        android:text="@string/feed_title_retention"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/etRetention"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvRetention"
+        android:layout_below="@+id/tvRetention"
+        android:layout_toLeftOf="@+id/tvUnitMinutes"
+        android:ems="10"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/tvUnitHours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/etRetention"
+        android:layout_alignBottom="@+id/etRetention"
+        android:layout_toRightOf="@+id/etRetention"
+        android:text="@string/feed_unit_hours"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

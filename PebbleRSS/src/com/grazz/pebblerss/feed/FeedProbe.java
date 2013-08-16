@@ -17,7 +17,7 @@ import com.axelby.riasel.FeedParser.FeedItemHandler;
 
 public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 
-	private Boolean _isParsed = false;
+	private boolean _isParsed = false;
 	private String _name;
 	private int _itemCount = 0;
 
@@ -45,7 +45,7 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 		}
 	}
 
-	public Boolean isParsed() {
+	public boolean isParsed() {
 		return _isParsed;
 	}
 

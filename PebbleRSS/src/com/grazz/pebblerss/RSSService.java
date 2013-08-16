@@ -77,12 +77,12 @@ public class RSSService extends Service {
 		_receiver.sendInRefreshPacket(this);
 	}
 
-	public Boolean isCanvasEnabled() {
+	public boolean isCanvasEnabled() {
 		SharedPreferences preferences = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		return preferences.getBoolean(getResources().getString(R.string.setting_enablecanvas), true);
 	}
 
-	public void setCanvasEnabled(Boolean enabled) {
+	public void setCanvasEnabled(boolean enabled) {
 		if (enabled) {
 			if (_canvasTask == null) {
 				_canvasTask = new TimerTask() {

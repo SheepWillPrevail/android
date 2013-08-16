@@ -23,9 +23,9 @@ import com.grazz.pebblerss.provider.RSSFeedItem;
 
 public class FeedRunner implements Runnable, FeedItemHandler {
 
-	private Boolean _isParsed = false;
 	private RSSFeed _feed;
 	private RSSDatabase _database;
+	private boolean _isParsed = false;
 
 	public FeedRunner(Context context, RSSFeed feed) {
 		_feed = feed;
@@ -43,11 +43,11 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		}
 	}
 
-	public Boolean isParsed() {
+	public boolean isParsed() {
 		return _isParsed;
 	}
 
-	private synchronized void setIsParsed(Boolean isParsed) {
+	private synchronized void setIsParsed(boolean isParsed) {
 		_isParsed = isParsed;
 		if (_isParsed)
 			_feed.setLastUpdated(System.currentTimeMillis());
@@ -85,6 +85,10 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		Date publicationDate = item.getPublicationDate();
 		if (publicationDate == null)
 			publicationDate = new Date();
+		Date updatedDate = item.getUpdatedDate();
+		if (updatedDate != null && updatedDate.after(publicationDate))
+			publicationDate = updatedDate;
+
 		if (_database.wantsFeedItem(_feed, uniqueId, publicationDate)) {
 			RSSFeedItem feedItem = new RSSFeedItem();
 			feedItem.setUniqueId(uniqueId);
@@ -96,19 +100,22 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			Jsoup.parse(item.getDescription()).traverse(new NodeVisitor() {
 				@Override
 				public void head(Node node, int depth) {
-					if ("#text".equalsIgnoreCase(node.nodeName()))
+					String name = node.nodeName();
+					if ("#text".equalsIgnoreCase(name))
 						filtered.append(Jsoup.parse(node.outerHtml()).text());
+					if ("a".equalsIgnoreCase(name))
+						filtered.append(" ");
 				}
 
 				@Override
 				public void tail(Node node, int depth) {
 					String name = node.nodeName();
-					if ("td".equalsIgnoreCase(name) | "dt".equalsIgnoreCase(name))
-						filtered.append(" ");
 					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name))
 						filtered.append("\n");
-					if ("p".equalsIgnoreCase(name) && node.childNodeSize() > 0)
+					if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
+					if ("a".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name) | "dt".equalsIgnoreCase(name))
+						filtered.append(" ");
 				}
 			});
 			feedItem.setContent(filtered.toString());

@@ -27,12 +27,12 @@ public class FeedListAdapter implements ListAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return _manager.getFeed(position);
+		return _manager.getFeedAt(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return _manager.getFeed(position).getId();
+		return _manager.getFeedAt(position).getId();
 	}
 
 	@Override
@@ -44,12 +44,12 @@ public class FeedListAdapter implements ListAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null)
 			convertView = View.inflate(parent.getContext(), R.layout.cell_feed, null);
-		RSSFeed feed = _manager.getFeed(position);
-		TextView tvFeedId = (TextView) convertView.findViewById(R.id.tvFeedId);
-		tvFeedId.setText("#" + (position + 1));
+		RSSFeed feed = _manager.getFeedAt(position);
+		TextView tvFeedId = (TextView) convertView.findViewById(R.id.tvURL);
 		TextView tvFeedName = (TextView) convertView.findViewById(R.id.tvFeedName);
-		tvFeedName.setText(feed.getName());
 		TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
+		tvFeedName.setText(feed.getName());
+		tvFeedId.setText("#" + (position + 1));
 		tvFeedInfo.setText(String.format("%d items", feed.getItems(_context).size()));
 		return convertView;
 	}

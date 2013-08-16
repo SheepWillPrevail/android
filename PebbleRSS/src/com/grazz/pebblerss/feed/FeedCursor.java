@@ -29,7 +29,7 @@ public class FeedCursor {
 		return total;
 	}
 
-	public Boolean isDone() {
+	public boolean isDone() {
 		return _index + 1 > getTotal();
 	}
 

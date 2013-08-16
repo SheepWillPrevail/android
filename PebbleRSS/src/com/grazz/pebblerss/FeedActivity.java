@@ -32,9 +32,10 @@ public class FeedActivity extends RSSServiceActivity {
 	private EditText _url;
 	private EditText _name;
 	private EditText _interval;
+	private EditText _retention;
 	private int _feedAction;
 	private long _feedId;
-	private Boolean _isValidFeed = false;
+	private boolean _isValidFeed = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +44,13 @@ public class FeedActivity extends RSSServiceActivity {
 		setupActionBar();
 
 		_url = (EditText) findViewById(R.id.etURL);
-		_name = (EditText) findViewById(R.id.etFeedName);
+		_name = (EditText) findViewById(R.id.etName);
 		_interval = (EditText) findViewById(R.id.etInterval);
+		_retention = (EditText) findViewById(R.id.etRetention);
 
 		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		final Resources resources = getResources();
-
-		Boolean seenWarning = pref.getBoolean(StaticValues.PREFERENCES_VALUE_SEEN_DATA_WARNING, false);
+		boolean seenWarning = pref.getBoolean(StaticValues.PREFERENCES_VALUE_SEEN_DATA_WARNING, false);
 		if (!seenWarning) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(resources.getString(R.string.data_warning_title));
@@ -97,20 +98,23 @@ public class FeedActivity extends RSSServiceActivity {
 			return true;
 		case R.id.action_save:
 			String intervalText = _interval.getText().toString();
-			if (!_isValidFeed || intervalText.length() == 0) {
-				Toast.makeText(this, getResources().getString(R.string.error_feed_invalid), Toast.LENGTH_LONG).show();
+			String retentionText = _retention.getText().toString();
+			if (!_isValidFeed || intervalText.length() == 0 || retentionText.length() == 0) {
+				Toast.makeText(this, getResources().getString(R.string.message_feed_invalid), Toast.LENGTH_LONG).show();
 				return false;
 			}
 			Uri uri = Uri.parse(_url.getText().toString());
 			String name = _name.getText().toString();
 			Integer interval = Integer.valueOf(intervalText);
+			Integer retention = Integer.valueOf(retentionText);
 			if (_feedAction == RSSFeed.FEED_ADD) {
-				feedManager.addFeed(uri, name, interval);
+				feedManager.addFeed(uri, name, interval, retention);
 			} else {
 				RSSFeed feed = feedManager.getFeedById(_feedId);
 				feed.setUri(uri);
 				feed.setName(name);
 				feed.setInterval(interval);
+				feed.setRetention(retention);
 				feed.persist(this);
 			}
 			finish();
@@ -131,6 +135,7 @@ public class FeedActivity extends RSSServiceActivity {
 		switch (_feedAction) {
 		case RSSFeed.FEED_ADD:
 			_interval.setText("30");
+			_retention.setText("24");
 			break;
 		case RSSFeed.FEED_EDIT:
 			_feedId = intent.getExtras().getLong(RSSFeed.FEED_ID);
@@ -138,6 +143,7 @@ public class FeedActivity extends RSSServiceActivity {
 			_url.setText(feed.getUri().toString());
 			_name.setText(feed.getName());
 			_interval.setText(String.valueOf(feed.getInterval()));
+			_retention.setText(String.valueOf(feed.getRetention()));
 			_isValidFeed = true;
 			break;
 		}

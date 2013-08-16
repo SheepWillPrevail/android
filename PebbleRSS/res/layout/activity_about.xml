@@ -24,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:gravity="center"
-        android:text="@string/donation" />
+        android:text="@string/message_donation" />
 
     <ImageView
         android:id="@+id/ivWikimedia"
@@ -41,7 +41,7 @@
         android:layout_below="@+id/ivWikimedia"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:text="@string/libraries_used"
+        android:text="@string/message_libraries_used"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
