@@ -34,41 +34,40 @@ import org.apache.http.params.HttpParams;
 
 import android.net.Uri;
 
-public class RelaxedAuthenticatingHttpConnection {
+public class SemiSecureHttpClient {
 
-	private static class TrustingSslSocketFactory implements LayeredSocketFactory {
-		private static TrustingSslSocketFactory _instance;
+	private static class TrustingSSLSocketFactory implements LayeredSocketFactory {
+		private static TrustingSSLSocketFactory _instance;
 
-		public static TrustingSslSocketFactory getSocketFactory() {
+		public static TrustingSSLSocketFactory getSocketFactory() {
 			if (_instance == null) {
-				_instance = new TrustingSslSocketFactory();
 				try {
-					TrustManager manager = new X509TrustManager() {
-						@Override
-						public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-						}
+					SSLContext context = SSLContext.getInstance("TLS");
+					if (context != null) {
+						context.init(null, new TrustManager[] { new X509TrustManager() {
+							@Override
+							public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+							}
 
-						@Override
-						public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-						}
+							@Override
+							public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+							}
 
-						@Override
-						public X509Certificate[] getAcceptedIssuers() {
-							return null;
-						}
-					};
-					_instance._context = SSLContext.getInstance("TLS");
-					_instance._context.init(null, new TrustManager[] { manager }, new SecureRandom());
-					_instance._factory = _instance._context.getSocketFactory();
+							@Override
+							public X509Certificate[] getAcceptedIssuers() {
+								return null;
+							}
+						} }, new SecureRandom());
+						_instance = new TrustingSSLSocketFactory();
+						_instance._factory = context.getSocketFactory();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-
 			return _instance;
 		}
 
-		private SSLContext _context;
 		private SSLSocketFactory _factory;
 
 		@Override
@@ -96,16 +95,15 @@ public class RelaxedAuthenticatingHttpConnection {
 		public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
 			return _factory.createSocket(socket, host, port, autoClose);
 		}
-
 	}
 
 	private InputStream _stream;
 
-	public RelaxedAuthenticatingHttpConnection(Uri uri, String username, String password) {
+	public SemiSecureHttpClient(Uri uri, String username, String password) {
 		try {
 			SchemeRegistry registry = new SchemeRegistry();
 			registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-			registry.register(new Scheme("https", TrustingSslSocketFactory.getSocketFactory(), 443));
+			registry.register(new Scheme("https", TrustingSSLSocketFactory.getSocketFactory(), 443));
 
 			BasicHttpParams params = new BasicHttpParams();
 			ClientConnectionManager manager = new ThreadSafeClientConnManager(params, registry);
@@ -119,7 +117,8 @@ public class RelaxedAuthenticatingHttpConnection {
 
 			HttpGet get = new HttpGet(uri.toString());
 			HttpResponse response = client.execute(get);
-			_stream = response.getEntity().getContent();
+			if (response.getStatusLine().getStatusCode() == 200)
+				_stream = response.getEntity().getContent();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

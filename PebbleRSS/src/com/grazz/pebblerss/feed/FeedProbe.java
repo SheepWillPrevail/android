@@ -26,13 +26,15 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
 			XmlPullParser pullparser = factory.newPullParser();
-			stream = new RelaxedAuthenticatingHttpConnection(link, username, password).getInputStream();
-			pullparser.setInput(stream, null);
-			FeedParser feedparser = new FeedParser();
-			feedparser.setOnFeedInfoHandler(this);
-			feedparser.setOnFeedItemHandler(this);
-			feedparser.parseFeed(pullparser);
-			_isParsed = true;
+			stream = new SemiSecureHttpClient(link, username, password).getInputStream();
+			if (stream != null) {
+				pullparser.setInput(stream, null);
+				FeedParser feedparser = new FeedParser();
+				feedparser.setOnFeedInfoHandler(this);
+				feedparser.setOnFeedItemHandler(this);
+				feedparser.parseFeed(pullparser);
+				_isParsed = true;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

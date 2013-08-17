@@ -43,6 +43,8 @@
     <string name="message_no_feeds">No feeds founds.</string>
     <string name="message_feed_invalid">This feed appears to be invalid.</string>
     <string name="message_deploy_failed">Unable to write to external memory.</string>
+    <string name="message_login_successful">Login successful.</string>
+    <string name="message_login_failed">Login failed.</string>
     <string name="watchapp_update_title">Update available</string>
     <string name="watchapp_update_message">Would you like to update the watch app?</string>
     <string name="data_warning_title">Warning</string>

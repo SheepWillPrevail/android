@@ -58,14 +58,7 @@ public class FeedActivity extends RSSServiceActivity {
 		_retention = (EditText) findViewById(R.id.etRetention);
 		_username = (EditText) findViewById(R.id.etUsername);
 		_password = (EditText) findViewById(R.id.etPassword);
-
 		_login = (Button) findViewById(R.id.bnLogin);
-		_login.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				checkFeed(_url.getText().toString());
-			}
-		});
 
 		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		final Resources resources = getResources();
@@ -192,10 +185,18 @@ public class FeedActivity extends RSSServiceActivity {
 			}
 		});
 
+		_login.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				checkFeed(_url.getText().toString());
+			}
+		});
+
 		tryGetShareItem(intent);
 	}
 
 	private void checkFeed(CharSequence s) {
+		_isValidFeed = false;
 		final String url = s.toString();
 		final String username = _username.getText().toString();
 		final String password = _password.getText().toString();
@@ -203,24 +204,32 @@ public class FeedActivity extends RSSServiceActivity {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String user = username;
-					if (user.length() == 0)
-						user = null;
-					final FeedProbe probe = new FeedProbe(Uri.parse(url), user, password);
+					final String finalUser = username.length() == 0 ? null : username;
+					final FeedProbe probe = new FeedProbe(Uri.parse(url), finalUser, password);
 					_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
-					if (_isValidFeed)
+					if (_isValidFeed) {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								_view.scrollTo(0, 0);
-								_name.setText(probe.getName());
+								if (finalUser != null)
+									Toast.makeText(FeedActivity.this, getResources().getString(R.string.message_login_successful), Toast.LENGTH_LONG).show();
+								if (_name.getText().length() == 0)
+									_name.setText(probe.getName());
+								_name.setSelection(_name.length());
 								_name.requestFocus();
+								_view.scrollTo(_view.getLeft(), _view.getTop());
+							}
+						});
+					} else if (finalUser != null)
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								Toast.makeText(FeedActivity.this, getResources().getString(R.string.message_login_failed), Toast.LENGTH_LONG).show();
 							}
 						});
 				}
 			}).start();
-		} else
-			_isValidFeed = false;
+		}
 	}
 
 	@SuppressLint("NewApi")

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="title_activity_about">Informatie</string>
+    <string name="title_activity_settings">Instellingen</string>
+    <string name="message_donation">Waardeer je dit programma? Geef aan een goed doel naar keus. Mijn voorstel:</string>
+    <string name="message_libraries_used">Dit programma gebruikt de volgende bibliotheken:</string>
+    <string name="message_no_feeds">Geen feeds gevonden.</string>
+    <string name="message_feed_invalid">Deze feed lijkt niet correct.</string>
+    <string name="message_deploy_failed">Kan niet naar extern geheugen schrijven.</string>
+    <string name="message_login_successful">Login correct.</string>
+    <string name="message_login_failed">Login mislukt.</string>
+    <string name="watchapp_update_title">Update beschikbaar</string>
+    <string name="watchapp_update_message">Wilt u de watch app bijwerken?</string>
+    <string name="data_warning_title">Waarschuwing</string>
+    <string name="data_warning_message">Het gebruik van RSS feeds kan veel data kosten. De ontwikkelaar is niet verantwoordelijk voor eventuele kosten hiervan.</string>
+    <string name="button_positive">Ja</string>
+    <string name="button_negative">Nee</string>
+    <string name="button_agree">Akkoord</string>
+    <string name="button_disagree">Niet akkoord</string>
+    <string name="setting_title_cellheight">Lijst rij hoogte</string>
+    <string name="setting_title_feedfont">Feed lijst lettertype</string>
+    <string name="setting_title_itemfont">Feed item lijst lettertype</string>
+    <string name="setting_title_messagefont">Item tekst lettertype</string>
+    <string name="setting_title_canvas_enabled">Verversing in achtergrond ingeschakeld</string>
+    <string name="setting_title_canvas_disabled">Verversing in achtergrond uitgeschakeld</string>
+    <string name="feed_title_name">Feed naam</string>
+    <string name="feed_title_refresh">Ververs frequentie</string>
+    <string name="feed_title_retention">Retentie periode</string>
+    <string name="feed_unit_hours">uren</string>
+    <string name="feed_unit_minutes">minuten</string>
+    <string name="feed_username">Gebruikersnaam</string>
+    <string name="feed_password">Wachtwoord</string>
+    <string name="feed_login">Inloggen</string>
+
+</resources>

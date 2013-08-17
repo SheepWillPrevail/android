@@ -188,14 +188,11 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			ByteBuffer buffer = ByteBuffer.allocate(content.length);
 			buffer.put(content);
 			buffer.rewind();
-			int parts = (content.length + (MAX_TRANSMIT_SIZE - 1)) / MAX_TRANSMIT_SIZE;
-			for (int offset = 0; offset < content.length; offset += MAX_TRANSMIT_SIZE) {
+			int parts = (content.length > 2048 ? 2048 : content.length + (MAX_TRANSMIT_SIZE - 1)) / MAX_TRANSMIT_SIZE;
+			for (int offset = 0; offset < parts * MAX_TRANSMIT_SIZE; offset += MAX_TRANSMIT_SIZE) {
 				int length = content.length - offset;
 				if (length > MAX_TRANSMIT_SIZE)
 					length = MAX_TRANSMIT_SIZE;
-				int end = offset + length;
-				if (end > 2048)
-					break;
 				byte[] packet = new byte[length];
 				buffer.get(packet, 0, length);
 				PebbleDictionary message_dict = new PebbleDictionary();
