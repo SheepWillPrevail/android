@@ -17,8 +17,12 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.URLUtil;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -29,10 +33,14 @@ import com.grazz.pebblerss.provider.RSSFeed;
 
 public class FeedActivity extends RSSServiceActivity {
 
+	private ScrollView _view;
 	private EditText _url;
 	private EditText _name;
 	private EditText _interval;
 	private EditText _retention;
+	private EditText _username;
+	private EditText _password;
+	private Button _login;
 	private int _feedAction;
 	private long _feedId;
 	private boolean _isValidFeed = false;
@@ -43,10 +51,21 @@ public class FeedActivity extends RSSServiceActivity {
 		setContentView(R.layout.activity_feed);
 		setupActionBar();
 
+		_view = (ScrollView) findViewById(R.id.svScroll);
 		_url = (EditText) findViewById(R.id.etURL);
 		_name = (EditText) findViewById(R.id.etName);
 		_interval = (EditText) findViewById(R.id.etInterval);
 		_retention = (EditText) findViewById(R.id.etRetention);
+		_username = (EditText) findViewById(R.id.etUsername);
+		_password = (EditText) findViewById(R.id.etPassword);
+
+		_login = (Button) findViewById(R.id.bnLogin);
+		_login.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				checkFeed(_url.getText().toString());
+			}
+		});
 
 		final SharedPreferences pref = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
 		final Resources resources = getResources();
@@ -105,16 +124,20 @@ public class FeedActivity extends RSSServiceActivity {
 			}
 			Uri uri = Uri.parse(_url.getText().toString());
 			String name = _name.getText().toString();
+			String username = _username.getText().toString();
+			String password = _password.getText().toString();
 			Integer interval = Integer.valueOf(intervalText);
 			Integer retention = Integer.valueOf(retentionText);
 			if (_feedAction == RSSFeed.FEED_ADD) {
-				feedManager.addFeed(uri, name, interval, retention);
+				feedManager.addFeed(uri, name, interval, retention, username, password);
 			} else {
 				RSSFeed feed = feedManager.getFeedById(_feedId);
 				feed.setUri(uri);
 				feed.setName(name);
 				feed.setInterval(interval);
 				feed.setRetention(retention);
+				feed.setUsername(username);
+				feed.setPassword(password);
 				feed.persist(this);
 			}
 			finish();
@@ -144,6 +167,12 @@ public class FeedActivity extends RSSServiceActivity {
 			_name.setText(feed.getName());
 			_interval.setText(String.valueOf(feed.getInterval()));
 			_retention.setText(String.valueOf(feed.getRetention()));
+			String username = feed.getUsername();
+			if (username != null)
+				_username.setText(username);
+			String password = feed.getPassword();
+			if (password != null)
+				_password.setText(password);
 			_isValidFeed = true;
 			break;
 		}
@@ -151,24 +180,7 @@ public class FeedActivity extends RSSServiceActivity {
 		_url.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				final String url = s.toString();
-				if (url != null && URLUtil.isValidUrl(url)) {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							final FeedProbe probe = new FeedProbe(Uri.parse(url));
-							_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
-							if (_isValidFeed)
-								runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										_name.setText(probe.getName());
-									}
-								});
-						}
-					}).start();
-				} else
-					_isValidFeed = false;
+				checkFeed(s);
 			}
 
 			@Override
@@ -181,6 +193,34 @@ public class FeedActivity extends RSSServiceActivity {
 		});
 
 		tryGetShareItem(intent);
+	}
+
+	private void checkFeed(CharSequence s) {
+		final String url = s.toString();
+		final String username = _username.getText().toString();
+		final String password = _password.getText().toString();
+		if (url != null && URLUtil.isValidUrl(url)) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					String user = username;
+					if (user.length() == 0)
+						user = null;
+					final FeedProbe probe = new FeedProbe(Uri.parse(url), user, password);
+					_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
+					if (_isValidFeed)
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								_view.scrollTo(0, 0);
+								_name.setText(probe.getName());
+								_name.requestFocus();
+							}
+						});
+				}
+			}).start();
+		} else
+			_isValidFeed = false;
 	}
 
 	@SuppressLint("NewApi")

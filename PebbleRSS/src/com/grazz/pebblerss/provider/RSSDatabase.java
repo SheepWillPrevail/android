@@ -19,6 +19,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	public static final String FEED_COLUMN_INTERVAL = "interval";
 	public static final String FEED_COLUMN_RETENTION = "retention";
 	public static final String FEED_COLUMN_LAST_UPDATE = "last_update";
+	public static final String FEED_COLUMN_USERNAME = "username";
+	public static final String FEED_COLUMN_PASSWORD = "password";
 
 	public static final String FEEDITEM_COLUMN_ID = "_id";
 	public static final String FEEDITEM_COLUMN_FEED_ID = "feed_id";
@@ -29,7 +31,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	public static final String FEEDITEM_COLUMN_CONTENT = "content";
 
 	private static final String[] FEED_ALL_COLUMNS = new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
-			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE };
+			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE, FEED_COLUMN_USERNAME, FEED_COLUMN_PASSWORD };
 	private static final String[] FEEDITEM_ALL_COLUMNS = new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_FEED_ID, FEEDITEM_COLUMN_UNIQUE_ID,
 			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT };
 
@@ -37,7 +39,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	private static final String FEEDITEM_TABLE_NAME = "feeditem";
 
 	public RSSDatabase(Context context) {
-		super(context, "pebblerss.db", null, 3);
+		super(context, "pebblerss.db", null, 4);
 	}
 
 	@Override
@@ -49,6 +51,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feedBuilder.append(FEED_COLUMN_NAME + " text,");
 		feedBuilder.append(FEED_COLUMN_INTERVAL + " integer,");
 		feedBuilder.append(FEED_COLUMN_RETENTION + " integer,");
+		feedBuilder.append(FEED_COLUMN_USERNAME + " text,");
+		feedBuilder.append(FEED_COLUMN_PASSWORD + " text,");
 		feedBuilder.append(FEED_COLUMN_LAST_UPDATE + " integer");
 		feedBuilder.append(")");
 		db.execSQL(feedBuilder.toString());
@@ -76,6 +80,10 @@ public class RSSDatabase extends SQLiteOpenHelper {
 			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_RETENTION + " integer");
 			db.execSQL("update " + FEED_TABLE_NAME + " set " + FEED_COLUMN_RETENTION + "=24 where " + FEED_COLUMN_RETENTION + " is null");
 		}
+		if (oldVersion < 4 && newVersion > 3) {
+			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_USERNAME + " text");
+			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_PASSWORD + " text");
+		}
 	}
 
 	public void createFeed(RSSFeed feed) {
@@ -84,6 +92,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		values.put(FEED_COLUMN_NAME, feed.getName());
 		values.put(FEED_COLUMN_INTERVAL, feed.getInterval());
 		values.put(FEED_COLUMN_RETENTION, feed.getRetention());
+		values.put(FEED_COLUMN_USERNAME, feed.getUsername());
+		values.put(FEED_COLUMN_PASSWORD, feed.getPassword());
 		values.put(FEED_COLUMN_LAST_UPDATE, feed.getLastUpdated());
 
 		SQLiteDatabase db = getWritableDatabase();
@@ -98,6 +108,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
 		feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
 		feed.setRetention(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_RETENTION)));
+		feed.setUsername(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_USERNAME)));
+		feed.setPassword(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_PASSWORD)));
 		feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
 		return feed;
 	}

@@ -71,5 +71,8 @@
     <string name="feed_title_retention">Retention period</string>
     <string name="feed_unit_hours">hours</string>
     <string name="feed_unit_minutes">minutes</string>
+    <string name="feed_username">Username</string>
+    <string name="feed_password">Password</string>
+    <string name="feed_login">Login</string>
 
 </resources>

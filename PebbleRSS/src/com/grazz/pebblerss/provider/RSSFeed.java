@@ -17,6 +17,8 @@ public class RSSFeed extends RSSDatabaseEntity {
 	private int _interval;
 	private int _retention;
 	private long _lastUpdated;
+	private String _username;
+	private String _password;
 
 	public Uri getUri() {
 		return _uri;
@@ -99,6 +101,22 @@ public class RSSFeed extends RSSDatabaseEntity {
 		db.deleteFeedItems(feed);
 		db.deleteFeed(feed);
 		db.close();
+	}
+
+	public String getUsername() {
+		return _username;
+	}
+
+	public void setUsername(String username) {
+		_username = username;
+	}
+
+	public String getPassword() {
+		return _password;
+	}
+
+	public void setPassword(String password) {
+		_password = password;
 	}
 
 }

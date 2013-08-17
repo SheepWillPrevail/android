@@ -43,12 +43,14 @@ public class FeedManager {
 		return null;
 	}
 
-	public RSSFeed addFeed(Uri uri, String name, int interval, int retention) {
+	public RSSFeed addFeed(Uri uri, String name, int interval, int retention, String username, String password) {
 		RSSFeed feed = new RSSFeed();
 		feed.setUri(uri);
 		feed.setName(name);
 		feed.setInterval(interval);
 		feed.setRetention(retention);
+		feed.setUsername(username);
+		feed.setPassword(password);
 
 		RSSFeed.createFeed(_service, feed);
 		notifyCanvas(_service);
@@ -108,7 +110,7 @@ public class FeedManager {
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-					addFeed(Uri.parse(link), name, Integer.valueOf(interval), 24);
+					addFeed(Uri.parse(link), name, Integer.valueOf(interval), 24, null, null);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -2,7 +2,6 @@ package com.grazz.pebblerss.feed;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -21,13 +20,13 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 	private String _name;
 	private int _itemCount = 0;
 
-	public FeedProbe(Uri link) {
+	public FeedProbe(Uri link, String username, String password) {
 		InputStream stream = null;
 		try {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
 			XmlPullParser pullparser = factory.newPullParser();
-			stream = new URL(link.toString()).openStream();
+			stream = new RelaxedAuthenticatingHttpConnection(link, username, password).getInputStream();
 			pullparser.setInput(stream, null);
 			FeedParser feedparser = new FeedParser();
 			feedparser.setOnFeedInfoHandler(this);

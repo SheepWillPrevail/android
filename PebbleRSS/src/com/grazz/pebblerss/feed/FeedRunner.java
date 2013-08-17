@@ -2,7 +2,6 @@ package com.grazz.pebblerss.feed;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Date;
 
 import org.jsoup.Jsoup;
@@ -60,7 +59,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(true);
 			XmlPullParser pullparser = factory.newPullParser();
-			stream = new URL(_feed.getUri().toString()).openStream();
+			stream = new RelaxedAuthenticatingHttpConnection(_feed.getUri(), _feed.getUsername(), _feed.getPassword()).getInputStream();
 			pullparser.setInput(stream, null);
 			FeedParser feedparser = new FeedParser();
 			feedparser.setOnFeedItemHandler(this);

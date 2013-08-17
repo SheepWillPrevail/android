@@ -1,113 +1,161 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/svScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".FeedActivity" >
+    android:padding="14dp" >
 
-    <TextView
-        android:id="@+id/tvURL"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="@string/feed_title_url"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_height="wrap_content" >
 
-    <EditText
-        android:id="@+id/etURL"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvURL"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/tvURL"
-        android:ems="10"
-        android:inputType="textUri" >
+        <TextView
+            android:id="@+id/tvURL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/feed_title_url"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <requestFocus />
-    </EditText>
+        <EditText
+            android:id="@+id/etURL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvURL"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/tvURL"
+            android:ems="10"
+            android:inputType="textUri" >
 
-    <TextView
-        android:id="@+id/tvFeedName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/etURL"
-        android:layout_below="@+id/etURL"
-        android:layout_marginTop="16dp"
-        android:text="@string/feed_title_name"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+            <requestFocus />
+        </EditText>
 
-    <EditText
-        android:id="@+id/etName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvFeedName"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/tvFeedName"
-        android:ems="10"
-        android:inputType="textNoSuggestions" />
+        <TextView
+            android:id="@+id/tvFeedName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etURL"
+            android:layout_below="@+id/etURL"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_title_name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/tvInterval"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/etName"
-        android:layout_below="@+id/etName"
-        android:layout_marginTop="16dp"
-        android:text="@string/feed_title_refresh"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvFeedName"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/tvFeedName"
+            android:ems="10"
+            android:inputType="textNoSuggestions" />
 
-    <EditText
-        android:id="@+id/etInterval"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvInterval"
-        android:layout_alignRight="@+id/tvFeedName"
-        android:layout_below="@+id/tvInterval"
-        android:ems="10"
-        android:inputType="number" />
+        <TextView
+            android:id="@+id/tvInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etName"
+            android:layout_below="@+id/etName"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_title_refresh"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/tvUnitMinutes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/etInterval"
-        android:layout_alignBottom="@+id/etInterval"
-        android:layout_toRightOf="@+id/etInterval"
-        android:text="@string/feed_unit_minutes"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <EditText
+            android:id="@+id/etInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvInterval"
+            android:layout_alignRight="@+id/tvFeedName"
+            android:layout_below="@+id/tvInterval"
+            android:ems="10"
+            android:inputType="number" />
 
-    <TextView
-        android:id="@+id/tvRetention"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/etInterval"
-        android:layout_below="@+id/etInterval"
-        android:layout_marginTop="16dp"
-        android:text="@string/feed_title_retention"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView
+            android:id="@+id/tvUnitMinutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/etInterval"
+            android:layout_alignBottom="@+id/etInterval"
+            android:layout_toRightOf="@+id/etInterval"
+            android:text="@string/feed_unit_minutes"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <EditText
-        android:id="@+id/etRetention"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/tvRetention"
-        android:layout_below="@+id/tvRetention"
-        android:layout_toLeftOf="@+id/tvUnitMinutes"
-        android:ems="10"
-        android:inputType="number" />
+        <TextView
+            android:id="@+id/tvRetention"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etInterval"
+            android:layout_below="@+id/etInterval"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_title_retention"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/tvUnitHours"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/etRetention"
-        android:layout_alignBottom="@+id/etRetention"
-        android:layout_toRightOf="@+id/etRetention"
-        android:text="@string/feed_unit_hours"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        <EditText
+            android:id="@+id/etRetention"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvRetention"
+            android:layout_below="@+id/tvRetention"
+            android:layout_toLeftOf="@+id/tvUnitMinutes"
+            android:ems="10"
+            android:inputType="number" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/tvUnitHours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/etRetention"
+            android:layout_alignBottom="@+id/etRetention"
+            android:layout_toRightOf="@+id/etRetention"
+            android:text="@string/feed_unit_hours"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etRetention"
+            android:layout_below="@+id/etRetention"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_username"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvUsername"
+            android:layout_below="@+id/tvUsername"
+            android:ems="10"
+            android:inputType="textWebEmailAddress" />
+
+        <TextView
+            android:id="@+id/tvPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etUsername"
+            android:layout_below="@+id/etUsername"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_password"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tvPassword"
+            android:layout_below="@+id/tvPassword"
+            android:ems="10"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/bnLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etPassword"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_login" />
+    </RelativeLayout>
+
+</ScrollView>
