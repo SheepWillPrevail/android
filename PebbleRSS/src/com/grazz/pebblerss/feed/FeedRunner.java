@@ -1,21 +1,27 @@
 package com.grazz.pebblerss.feed;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeVisitor;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
+import android.net.Uri;
 
+import com.axelby.riasel.FeedItem;
+import com.axelby.riasel.FeedParser;
+import com.axelby.riasel.FeedParser.FeedItemHandler;
 import com.grazz.pebblerss.provider.RSSDatabase;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
-import com.grazz.pebblerss.rss.FeedItem;
-import com.grazz.pebblerss.rss.FeedParser;
-import com.grazz.pebblerss.rss.FeedParserFactory;
 
-public class FeedRunner implements Runnable {
+public class FeedRunner implements Runnable, FeedItemHandler {
 
 	private RSSFeed _feed;
 	private RSSDatabase _database;
@@ -49,34 +55,46 @@ public class FeedRunner implements Runnable {
 
 	@Override
 	public void run() {
-		FeedParser parser = FeedParserFactory.getParser(_feed.getUri());
-		if (parser != null) {
-			for (FeedItem item : parser.getFeed().getItems())
-				readFeedItem(item);
+		InputStream stream = null;
+		try {
+			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			factory.setNamespaceAware(true);
+			XmlPullParser pullparser = factory.newPullParser();
+			stream = new URL(_feed.getUri().toString()).openStream();
+			pullparser.setInput(stream, null);
+			FeedParser feedparser = new FeedParser();
+			feedparser.setOnFeedItemHandler(this);
+			feedparser.parseFeed(pullparser);
 			setIsParsed(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (stream != null)
+				try {
+					stream.close();
+				} catch (IOException e) {
+				}
 		}
 	}
 
-	public void readFeedItem(FeedItem item) {
-		String id = item.getId();
-		if (id == null)
-			id = item.getLink().toString();
+	@Override
+	public void OnFeedItem(FeedParser feedParser, FeedItem item) {
+		String uniqueId = item.getUniqueId();
+		if (uniqueId == null)
+			uniqueId = item.getLink();
 		Date publicationDate = item.getPublicationDate();
 		if (publicationDate == null)
 			publicationDate = new Date();
-		Date updatedDate = item.getUpdatedDate();
-		if (updatedDate != null && updatedDate.after(publicationDate))
-			publicationDate = updatedDate;
 
-		if (_database.wantsFeedItem(_feed, id, publicationDate)) {
+		if (_database.wantsFeedItem(_feed, uniqueId, publicationDate)) {
 			RSSFeedItem feedItem = new RSSFeedItem();
-			feedItem.setUniqueId(id);
+			feedItem.setUniqueId(uniqueId);
 			feedItem.setPublicationDate(publicationDate);
-			feedItem.setUri(item.getLink());
+			feedItem.setUri(Uri.parse(item.getLink()));
 			feedItem.setTitle(item.getTitle());
 
 			final StringBuilder filtered = new StringBuilder();
-			Jsoup.parse(item.getContent()).traverse(new NodeVisitor() {
+			Jsoup.parse(item.getDescription()).traverse(new NodeVisitor() {
 				@Override
 				public void head(Node node, int depth) {
 					String name = node.nodeName();
