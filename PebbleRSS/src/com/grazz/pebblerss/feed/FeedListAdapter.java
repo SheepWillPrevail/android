@@ -1,7 +1,9 @@
 package com.grazz.pebblerss.feed;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -14,10 +16,15 @@ public class FeedListAdapter implements ListAdapter {
 
 	private Context _context;
 	private FeedManager _manager;
+	private SparseArray<Integer> _itemCache;
+	private String _itemText;
 
+	@SuppressLint("UseSparseArrays")
 	public FeedListAdapter(Context context, FeedManager manager) {
 		_context = context;
 		_manager = manager;
+		_itemCache = new SparseArray<Integer>();
+		_itemText = context.getResources().getString(R.string.main_item_count);
 	}
 
 	@Override
@@ -50,7 +57,9 @@ public class FeedListAdapter implements ListAdapter {
 		TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
 		tvFeedName.setText(feed.getName());
 		tvFeedId.setText("#" + (position + 1));
-		tvFeedInfo.setText(String.format("%d items", feed.getItems(_context).size()));
+		if (_itemCache.get(position) == null)
+			_itemCache.put(position, feed.getItems(_context).size());
+		tvFeedInfo.setText(String.format("%d %s", _itemCache.get(position), _itemText));
 		return convertView;
 	}
 
@@ -85,6 +94,10 @@ public class FeedListAdapter implements ListAdapter {
 	@Override
 	public boolean isEnabled(int position) {
 		return false;
+	}
+
+	public void invalidateCache() {
+		_itemCache.clear();
 	}
 
 }

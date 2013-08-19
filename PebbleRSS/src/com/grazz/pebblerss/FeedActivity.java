@@ -150,6 +150,8 @@ public class FeedActivity extends RSSServiceActivity {
 		_feedAction = intent.getExtras().getInt(RSSFeed.FEED_ACTION);
 		switch (_feedAction) {
 		case RSSFeed.FEED_ADD:
+			_url.setText("http://");
+			_url.setSelection(_url.length());
 			_interval.setText("30");
 			_retention.setText("24");
 			break;

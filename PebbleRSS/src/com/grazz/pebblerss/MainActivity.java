@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.grazz.pebblerss.feed.FeedListAdapter;
 import com.grazz.pebblerss.feed.FeedManager;
 import com.grazz.pebblerss.provider.RSSFeed;
 
@@ -95,7 +94,7 @@ public class MainActivity extends RSSServiceActivity {
 	@Override
 	protected void onBindToService() {
 		final FeedManager manager = getRSSService().getFeedManager();
-		_lvFeeds.setAdapter(new FeedListAdapter(this, manager));
+		_lvFeeds.setAdapter(manager.getAdapter());
 		_lvFeeds.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {

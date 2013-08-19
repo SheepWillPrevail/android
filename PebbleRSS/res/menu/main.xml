@@ -3,10 +3,10 @@
     <item
         android:id="@+id/action_add"
         android:showAsAction="always"
-        android:title="Add feed"/>
+        android:title="@string/menu_add_feed"/>
     <item
         android:id="@+id/action_app"
-        android:title="Install watch app"/>
+        android:title="@string/menu_install_app"/>
     <item
         android:id="@+id/action_settings"
         android:title="@string/title_activity_settings"/>

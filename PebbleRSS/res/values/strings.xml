@@ -58,7 +58,7 @@
     <string name="setting_title_feedfont">Feed list font</string>
     <string name="setting_title_itemfont">Feed item list font</string>
     <string name="setting_title_messagefont">Item text font</string>
-    <string name="setting_section_canvasplugin">Pebble Canvas plugin</string>
+    <string name="setting_section_canvasplugin">Canvas for Pebble plugin</string>
     <string name="setting_title_canvas_enabled">Background feed refresh enabled</string>
     <string name="setting_title_canvas_disabled">Background feed refresh disabled</string>
     <string name="setting_cellheight">cellheight</string>
@@ -76,5 +76,10 @@
     <string name="feed_username">Username</string>
     <string name="feed_password">Password</string>
     <string name="feed_login">Login</string>
+    <string name="menu_add_feed">Add feed</string>
+    <string name="menu_save">Save</string>
+    <string name="menu_delete_feed">Delete</string>
+    <string name="menu_install_app">Install watch app</string>
+    <string name="main_item_count">items</string>
 
 </resources>
