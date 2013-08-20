@@ -57,9 +57,7 @@ public class FeedListAdapter implements ListAdapter {
 		TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
 		tvFeedName.setText(feed.getName());
 		tvFeedId.setText("#" + (position + 1));
-		if (_itemCache.get(position) == null)
-			_itemCache.put(position, feed.getItems(_context).size());
-		tvFeedInfo.setText(String.format("%d %s", _itemCache.get(position), _itemText));
+		tvFeedInfo.setText(String.format("%d %s", feed.getItems(_context).size(), _itemText));
 		return convertView;
 	}
 

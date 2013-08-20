@@ -22,17 +22,10 @@ import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 public class FeedManager {
 
 	private RSSService _service;
-	private FeedListAdapter _adapter;
 	private boolean _isRefreshingFeeds = false;
 
 	public FeedManager(RSSService service) {
 		_service = service;
-	}
-
-	public FeedListAdapter getAdapter() {
-		if (_adapter == null)
-			_adapter = new FeedListAdapter(_service, this);
-		return _adapter;
 	}
 
 	public List<RSSFeed> getFeeds() {
@@ -96,8 +89,6 @@ public class FeedManager {
 
 		if (doRefresh)
 			_isRefreshingFeeds = false;
-
-		_adapter.invalidateCache();
 
 		return wasStale;
 	}

@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.grazz.pebblerss.feed.FeedManager;
+import com.grazz.pebblerss.feed.FeedListAdapter;
 import com.grazz.pebblerss.provider.RSSFeed;
 
 public class MainActivity extends RSSServiceActivity {
@@ -34,6 +34,7 @@ public class MainActivity extends RSSServiceActivity {
 	private static final String WATCHAPP_FILENAME = "pebblerss.pbw";
 
 	private ListView _lvFeeds;
+	private FeedListAdapter _adapter;
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -93,12 +94,10 @@ public class MainActivity extends RSSServiceActivity {
 
 	@Override
 	protected void onBindToService() {
-		final FeedManager manager = getRSSService().getFeedManager();
-		_lvFeeds.setAdapter(manager.getAdapter());
 		_lvFeeds.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				RSSFeed feed = manager.getFeedById(id);
+				RSSFeed feed = getRSSService().getFeedManager().getFeedById(id);
 				Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
 				intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_EDIT);
 				intent.putExtra(RSSFeed.FEED_ID, feed.getId());
@@ -106,6 +105,7 @@ public class MainActivity extends RSSServiceActivity {
 				return true;
 			}
 		});
+		refreshFeedView();
 		refreshFeeds();
 	}
 
@@ -129,7 +129,10 @@ public class MainActivity extends RSSServiceActivity {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				_lvFeeds.setAdapter(_lvFeeds.getAdapter());
+				RSSService service = getRSSService();
+				if (_adapter == null && service != null)
+					_adapter = new FeedListAdapter(MainActivity.this, service.getFeedManager());
+				_lvFeeds.setAdapter(_adapter);
 			}
 		});
 	}
