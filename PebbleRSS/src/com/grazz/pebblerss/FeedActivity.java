@@ -122,7 +122,7 @@ public class FeedActivity extends RSSServiceActivity {
 			Integer interval = Integer.valueOf(intervalText);
 			Integer retention = Integer.valueOf(retentionText);
 			if (_feedAction == RSSFeed.FEED_ADD) {
-				feedManager.addFeed(uri, name, interval, retention, username, password);
+				feedManager.createFeed(uri, name, interval, retention, username, password);
 			} else {
 				RSSFeed feed = feedManager.getFeedById(_feedId);
 				feed.setUri(uri);
@@ -131,7 +131,7 @@ public class FeedActivity extends RSSServiceActivity {
 				feed.setRetention(retention);
 				feed.setUsername(username);
 				feed.setPassword(password);
-				feed.persist(this);
+				feedManager.updateFeed(feed);
 			}
 			finish();
 			return true;

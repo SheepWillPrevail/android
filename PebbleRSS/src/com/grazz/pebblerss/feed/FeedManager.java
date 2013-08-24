@@ -1,6 +1,7 @@
 package com.grazz.pebblerss.feed;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -22,14 +23,18 @@ import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 public class FeedManager {
 
 	private RSSService _service;
+	private List<RSSFeed> _feedCache;
 	private boolean _isRefreshingFeeds = false;
 
 	public FeedManager(RSSService service) {
 		_service = service;
+		_feedCache = new ArrayList<RSSFeed>();
 	}
 
 	public List<RSSFeed> getFeeds() {
-		return RSSFeed.getFeeds(_service);
+		if (_feedCache.isEmpty())
+			_feedCache.addAll(RSSFeed.getFeeds(_service));
+		return _feedCache;
 	}
 
 	public RSSFeed getFeedAt(int position) {
@@ -43,7 +48,7 @@ public class FeedManager {
 		return null;
 	}
 
-	public RSSFeed addFeed(Uri uri, String name, int interval, int retention, String username, String password) {
+	public RSSFeed createFeed(Uri uri, String name, int interval, int retention, String username, String password) {
 		RSSFeed feed = new RSSFeed();
 		feed.setUri(uri);
 		feed.setName(name);
@@ -53,13 +58,23 @@ public class FeedManager {
 		feed.setPassword(password);
 
 		RSSFeed.createFeed(_service, feed);
+		_feedCache.clear();
+
 		notifyCanvas(_service);
 
 		return feed;
 	}
 
+	public void updateFeed(RSSFeed feed) {
+		feed.persist(_service);
+
+		notifyCanvas(_service);
+	}
+
 	public void removeFeed(RSSFeed feed) {
 		RSSFeed.deleteFeed(_service, feed);
+		_feedCache.clear();
+
 		notifyCanvas(_service);
 	}
 
@@ -80,7 +95,7 @@ public class FeedManager {
 					if (count++ == 0)
 						_service.sendIsParsingPacket();
 					new FeedRunner(_service, feed).doParse();
-					feed.persist(_service);
+					updateFeed(feed);
 					wasStale = true;
 				}
 			}
@@ -110,7 +125,7 @@ public class FeedManager {
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-					addFeed(Uri.parse(link), name, Integer.valueOf(interval), 24, null, null);
+					createFeed(Uri.parse(link), name, Integer.valueOf(interval), 24, null, null);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

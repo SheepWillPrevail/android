@@ -42,8 +42,6 @@ public class MainActivity extends RSSServiceActivity {
 		RSSService service = getRSSService();
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			if (service.isCanvasEnabled())
-				service.getFeedManager().notifyCanvas(this);
 			refreshFeeds();
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
@@ -119,7 +117,9 @@ public class MainActivity extends RSSServiceActivity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				getRSSService().getFeedManager().checkFeeds(true);
+				boolean wasStale = getRSSService().getFeedManager().checkFeeds(true);
+				if (wasStale && _adapter != null)
+					_adapter.invalidateCache();
 				refreshFeedView();
 			}
 		}).start();

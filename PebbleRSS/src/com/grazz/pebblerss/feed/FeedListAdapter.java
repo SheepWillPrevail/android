@@ -1,9 +1,8 @@
 package com.grazz.pebblerss.feed;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -16,14 +15,13 @@ public class FeedListAdapter implements ListAdapter {
 
 	private Context _context;
 	private FeedManager _manager;
-	private SparseArray<Integer> _itemCache;
+	private SparseIntArray _itemCache;
 	private String _itemText;
 
-	@SuppressLint("UseSparseArrays")
 	public FeedListAdapter(Context context, FeedManager manager) {
 		_context = context;
 		_manager = manager;
-		_itemCache = new SparseArray<Integer>();
+		_itemCache = new SparseIntArray();
 		_itemText = context.getResources().getString(R.string.main_item_count);
 	}
 
@@ -51,13 +49,20 @@ public class FeedListAdapter implements ListAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null)
 			convertView = View.inflate(parent.getContext(), R.layout.cell_feed, null);
+
 		RSSFeed feed = _manager.getFeedAt(position);
+
 		TextView tvFeedId = (TextView) convertView.findViewById(R.id.tvURL);
-		TextView tvFeedName = (TextView) convertView.findViewById(R.id.tvFeedName);
-		TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
-		tvFeedName.setText(feed.getName());
 		tvFeedId.setText("#" + (position + 1));
-		tvFeedInfo.setText(String.format("%d %s", feed.getItems(_context).size(), _itemText));
+
+		TextView tvFeedName = (TextView) convertView.findViewById(R.id.tvFeedName);
+		tvFeedName.setText(feed.getName());
+
+		TextView tvFeedInfo = (TextView) convertView.findViewById(R.id.tvFeedInfo);
+		if (_itemCache.indexOfKey(position) < 0)
+			_itemCache.put(position, feed.getItems(_context).size());
+		tvFeedInfo.setText(String.format("%d %s", _itemCache.get(position), _itemText));
+
 		return convertView;
 	}
 

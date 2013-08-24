@@ -12,6 +12,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
 import android.net.Uri;
+import android.webkit.URLUtil;
 
 import com.axelby.riasel.FeedItem;
 import com.axelby.riasel.FeedParser;
@@ -40,6 +41,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		_database.close();
 	}
 
 	public boolean isParsed() {
@@ -83,15 +85,20 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		String uniqueId = item.getUniqueId();
 		if (uniqueId == null)
 			uniqueId = item.getLink();
+
 		Date publicationDate = item.getPublicationDate();
 		if (publicationDate == null)
 			publicationDate = new Date();
 
 		if (_database.wantsFeedItem(_feed, uniqueId, publicationDate)) {
+			Uri uri = _feed.getUri();
+			if (URLUtil.isValidUrl(item.getLink()))
+				uri = Uri.parse(item.getLink());
+
 			RSSFeedItem feedItem = new RSSFeedItem();
 			feedItem.setUniqueId(uniqueId);
 			feedItem.setPublicationDate(publicationDate);
-			feedItem.setUri(Uri.parse(item.getLink()));
+			feedItem.setUri(uri);
 			feedItem.setTitle(item.getTitle());
 
 			final StringBuilder filtered = new StringBuilder();
@@ -100,8 +107,8 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 				public void head(Node node, int depth) {
 					String name = node.nodeName();
 					if ("#text".equalsIgnoreCase(name))
-						filtered.append(Jsoup.parse(node.outerHtml()).text());
-					if ("a".equalsIgnoreCase(name))
+						filtered.append(Jsoup.parseBodyFragment(node.outerHtml()).text());
+					else if ("a".equalsIgnoreCase(name) || "b".equalsIgnoreCase(name) || "i".equalsIgnoreCase(name))
 						filtered.append(" ");
 				}
 
@@ -110,9 +117,10 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 					String name = node.nodeName();
 					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name))
 						filtered.append("\n");
-					if ("p".equalsIgnoreCase(name))
+					else if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
-					if ("a".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name) | "dt".equalsIgnoreCase(name))
+					else if ("a".equalsIgnoreCase(name) || "b".equalsIgnoreCase(name) || "i".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name)
+							|| "dt".equalsIgnoreCase(name))
 						filtered.append(" ");
 				}
 			});
@@ -121,5 +129,4 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			_database.createFeedItem(_feed, feedItem);
 		}
 	}
-
 }

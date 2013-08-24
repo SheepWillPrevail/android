@@ -19,9 +19,9 @@
     <string name="button_agree">Akkoord</string>
     <string name="button_disagree">Niet akkoord</string>
     <string name="setting_title_cellheight">Lijst rij hoogte</string>
-    <string name="setting_title_feedfont">Feed lijst lettertype</string>
-    <string name="setting_title_itemfont">Feed item lijst lettertype</string>
-    <string name="setting_title_messagefont">Item tekst lettertype</string>
+    <string name="setting_title_feedfont">Lettertype feed lijst</string>
+    <string name="setting_title_itemfont">Lettertype feed artikel lijst</string>
+    <string name="setting_title_messagefont">Lettertype artikel tekst</string>
     <string name="setting_title_canvas_enabled">Verversing in achtergrond ingeschakeld</string>
     <string name="setting_title_canvas_disabled">Verversing in achtergrond uitgeschakeld</string>
     <string name="feed_title_name">Feed naam</string>
