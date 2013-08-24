@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeVisitor;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -102,14 +103,17 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			feedItem.setTitle(item.getTitle());
 
 			final StringBuilder filtered = new StringBuilder();
-			Jsoup.parse(item.getDescription()).traverse(new NodeVisitor() {
+			Jsoup.parseBodyFragment(item.getDescription()).traverse(new NodeVisitor() {
 				@Override
 				public void head(Node node, int depth) {
-					String name = node.nodeName();
-					if ("#text".equalsIgnoreCase(name))
-						filtered.append(Jsoup.parseBodyFragment(node.outerHtml()).text());
-					else if ("a".equalsIgnoreCase(name) || "b".equalsIgnoreCase(name) || "i".equalsIgnoreCase(name))
-						filtered.append(" ");
+					if ("#text".equalsIgnoreCase(node.nodeName())) {
+						String text = ((TextNode) node).getWholeText();
+						String name = node.parent().nodeName();
+						boolean isEmptyEntityText = ("body".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "table"
+								.equalsIgnoreCase(name)) && text.trim().length() == 0;
+						if (!isEmptyEntityText)
+							filtered.append(text.replace("\n", ""));
+					}
 				}
 
 				@Override
@@ -119,8 +123,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 						filtered.append("\n");
 					else if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
-					else if ("a".equalsIgnoreCase(name) || "b".equalsIgnoreCase(name) || "i".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name)
-							|| "dt".equalsIgnoreCase(name))
+					else if ("td".equalsIgnoreCase(name) || "dt".equalsIgnoreCase(name))
 						filtered.append(" ");
 				}
 			});

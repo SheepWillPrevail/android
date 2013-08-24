@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.grazz.pebblerss.feed.FeedListAdapter;
+import com.grazz.pebblerss.feed.FeedManager;
 import com.grazz.pebblerss.provider.RSSFeed;
 
 public class MainActivity extends RSSServiceActivity {
@@ -42,7 +43,7 @@ public class MainActivity extends RSSServiceActivity {
 		RSSService service = getRSSService();
 		switch (requestCode) {
 		case ID_ACTIVITY_FEED:
-			refreshFeeds();
+			refreshFeedView();
 			break;
 		case ID_ACTIVITY_UPDATEWATCHAPP:
 			setWatchAppUpdated();
@@ -92,10 +93,13 @@ public class MainActivity extends RSSServiceActivity {
 
 	@Override
 	protected void onBindToService() {
+		final FeedManager manager = getRSSService().getFeedManager();
+		_adapter = new FeedListAdapter(MainActivity.this, manager);
+		_lvFeeds.setAdapter(_adapter);
 		_lvFeeds.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				RSSFeed feed = getRSSService().getFeedManager().getFeedById(id);
+				RSSFeed feed = manager.getFeedById(id);
 				Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
 				intent.putExtra(RSSFeed.FEED_ACTION, RSSFeed.FEED_EDIT);
 				intent.putExtra(RSSFeed.FEED_ID, feed.getId());
@@ -103,8 +107,6 @@ public class MainActivity extends RSSServiceActivity {
 				return true;
 			}
 		});
-		refreshFeedView();
-		refreshFeeds();
 	}
 
 	@Override
@@ -113,28 +115,9 @@ public class MainActivity extends RSSServiceActivity {
 		refreshFeedView();
 	}
 
-	private void refreshFeeds() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				boolean wasStale = getRSSService().getFeedManager().checkFeeds(true);
-				if (wasStale && _adapter != null)
-					_adapter.invalidateCache();
-				refreshFeedView();
-			}
-		}).start();
-	}
-
 	private void refreshFeedView() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				RSSService service = getRSSService();
-				if (_adapter == null && service != null)
-					_adapter = new FeedListAdapter(MainActivity.this, service.getFeedManager());
-				_lvFeeds.setAdapter(_adapter);
-			}
-		});
+		if (_adapter != null)
+			_adapter.notifyDataSetChanged();
 	}
 
 	private void checkWatchAppUpdate() {

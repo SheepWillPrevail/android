@@ -64,12 +64,6 @@ public class RSSFeed extends RSSDatabaseEntity {
 		return System.currentTimeMillis() > getLastUpdated() + (60 * 1000 * getInterval());
 	}
 
-	public void persist(Context context) {
-		RSSDatabase db = new RSSDatabase(context);
-		db.updateFeed(this);
-		db.close();
-	}
-
 	public List<RSSFeedItem> getItems(Context context) {
 		RSSDatabase db = new RSSDatabase(context);
 		List<RSSFeedItem> feedItems = db.readFeedItems(this);
@@ -88,6 +82,12 @@ public class RSSFeed extends RSSDatabaseEntity {
 		List<RSSFeed> feeds = db.readFeeds();
 		db.close();
 		return feeds;
+	}
+
+	public static void updateFeed(Context context, RSSFeed feed) {
+		RSSDatabase db = new RSSDatabase(context);
+		db.updateFeed(feed);
+		db.close();
 	}
 
 	public static void cleanupFeedItems(Context context, RSSFeed feed, int retentionPeriod) {

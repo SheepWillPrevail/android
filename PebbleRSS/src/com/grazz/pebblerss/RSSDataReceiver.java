@@ -137,7 +137,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(1013, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_feedfont), "5")).byteValue());
 		dictionary.addUint8(1014, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_itemfont), "0")).byteValue());
-		dictionary.addUint8(1015, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_messagefont), "0")).byteValue());
+		dictionary.addUint8(1015, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_messagefont), "2")).byteValue());
 		dictionary.addUint8(1016, Integer.valueOf(preferences.getString(resources.getString(R.string.setting_cellheight), "33")).byteValue());
 		queueData(dictionary);
 		sendData(context, 0);

@@ -1,17 +1,16 @@
 package com.grazz.pebblerss.feed;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.grazz.pebblerss.R;
 import com.grazz.pebblerss.provider.RSSFeed;
 
-public class FeedListAdapter implements ListAdapter {
+public class FeedListAdapter extends BaseAdapter {
 
 	private Context _context;
 	private FeedManager _manager;
@@ -23,6 +22,11 @@ public class FeedListAdapter implements ListAdapter {
 		_manager = manager;
 		_itemCache = new SparseIntArray();
 		_itemText = context.getResources().getString(R.string.main_item_count);
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		return false;
 	}
 
 	@Override
@@ -38,11 +42,6 @@ public class FeedListAdapter implements ListAdapter {
 	@Override
 	public long getItemId(int position) {
 		return _manager.getFeedAt(position).getId();
-	}
-
-	@Override
-	public int getItemViewType(int position) {
-		return 0;
 	}
 
 	@Override
@@ -72,35 +71,24 @@ public class FeedListAdapter implements ListAdapter {
 	}
 
 	@Override
+	public boolean isEnabled(int position) {
+		return false;
+	}
+
+	@Override
 	public boolean hasStableIds() {
 		return true;
 	}
 
 	@Override
+	public void notifyDataSetChanged() {
+		super.notifyDataSetChanged();
+		_itemCache.clear();
+	}
+
+	@Override
 	public boolean isEmpty() {
 		return _manager.getFeeds().isEmpty();
-	}
-
-	@Override
-	public void registerDataSetObserver(DataSetObserver observer) {
-	}
-
-	@Override
-	public void unregisterDataSetObserver(DataSetObserver observer) {
-	}
-
-	@Override
-	public boolean areAllItemsEnabled() {
-		return false;
-	}
-
-	@Override
-	public boolean isEnabled(int position) {
-		return false;
-	}
-
-	public void invalidateCache() {
-		_itemCache.clear();
 	}
 
 }

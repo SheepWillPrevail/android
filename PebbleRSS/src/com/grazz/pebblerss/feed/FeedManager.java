@@ -1,7 +1,6 @@
 package com.grazz.pebblerss.feed;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -23,18 +22,14 @@ import com.pennas.pebblecanvas.plugin.PebbleCanvasPlugin;
 public class FeedManager {
 
 	private RSSService _service;
-	private List<RSSFeed> _feedCache;
 	private boolean _isRefreshingFeeds = false;
 
 	public FeedManager(RSSService service) {
 		_service = service;
-		_feedCache = new ArrayList<RSSFeed>();
 	}
 
 	public List<RSSFeed> getFeeds() {
-		if (_feedCache.isEmpty())
-			_feedCache.addAll(RSSFeed.getFeeds(_service));
-		return _feedCache;
+		return RSSFeed.getFeeds(_service);
 	}
 
 	public RSSFeed getFeedAt(int position) {
@@ -58,23 +53,18 @@ public class FeedManager {
 		feed.setPassword(password);
 
 		RSSFeed.createFeed(_service, feed);
-		_feedCache.clear();
-
 		notifyCanvas(_service);
 
 		return feed;
 	}
 
 	public void updateFeed(RSSFeed feed) {
-		feed.persist(_service);
-
+		RSSFeed.updateFeed(_service, feed);
 		notifyCanvas(_service);
 	}
 
 	public void removeFeed(RSSFeed feed) {
 		RSSFeed.deleteFeed(_service, feed);
-		_feedCache.clear();
-
 		notifyCanvas(_service);
 	}
 
@@ -87,8 +77,8 @@ public class FeedManager {
 			}
 		}
 
-		int count = 0;
 		boolean wasStale = false;
+		int count = 0;
 		for (RSSFeed feed : getFeeds()) {
 			if (feed.isStale()) {
 				if (doRefresh && parseIfStale) {

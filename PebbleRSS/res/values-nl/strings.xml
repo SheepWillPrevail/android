@@ -36,5 +36,6 @@
     <string name="menu_save">Opslaan</string>
     <string name="menu_delete_feed">Verwijderen</string>
     <string name="menu_install_app">Watch app installeren</string>
+    <string name="main_item_count">artikelen</string>
 
 </resources>
