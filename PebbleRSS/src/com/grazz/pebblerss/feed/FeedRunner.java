@@ -26,7 +26,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 
 	private RSSFeed _feed;
 	private RSSDatabase _database;
-	private boolean _isParsed = false;
+	private boolean _isParsed;
 
 	public FeedRunner(Context context, RSSFeed feed) {
 		_feed = feed;
@@ -119,12 +119,10 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 				@Override
 				public void tail(Node node, int depth) {
 					String name = node.nodeName();
-					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name))
+					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name) || "dt".equalsIgnoreCase(name))
 						filtered.append("\n");
 					else if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
-					else if ("td".equalsIgnoreCase(name) || "dt".equalsIgnoreCase(name))
-						filtered.append(" ");
 				}
 			});
 			feedItem.setContent(filtered.toString());

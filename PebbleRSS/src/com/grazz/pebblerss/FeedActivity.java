@@ -202,7 +202,7 @@ public class FeedActivity extends RSSServiceActivity {
 		final String url = s.toString();
 		final String username = _username.getText().toString();
 		final String password = _password.getText().toString();
-		if (url != null && URLUtil.isValidUrl(url)) {
+		if (url != null && URLUtil.isValidUrl(url))
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -231,7 +231,6 @@ public class FeedActivity extends RSSServiceActivity {
 						});
 				}
 			}).start();
-		}
 	}
 
 	@SuppressLint("NewApi")
