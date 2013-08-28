@@ -127,6 +127,8 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			});
 			feedItem.setContent(filtered.toString());
 
+			feedItem.setThumbnail(item.getThumbnailURL());
+
 			_database.createFeedItem(_feed, feedItem);
 		}
 	}

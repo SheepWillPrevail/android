@@ -29,17 +29,18 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	public static final String FEEDITEM_COLUMN_URI = "uri";
 	public static final String FEEDITEM_COLUMN_TITLE = "title";
 	public static final String FEEDITEM_COLUMN_CONTENT = "content";
+	public static final String FEEDITEM_COLUMN_THUMBNAIL = "thumbnail";
 
 	private static final String[] FEED_ALL_COLUMNS = new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
 			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE, FEED_COLUMN_USERNAME, FEED_COLUMN_PASSWORD };
 	private static final String[] FEEDITEM_ALL_COLUMNS = new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_FEED_ID, FEEDITEM_COLUMN_UNIQUE_ID,
-			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT };
+			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT, FEEDITEM_COLUMN_THUMBNAIL };
 
 	private static final String FEED_TABLE_NAME = "feed";
 	private static final String FEEDITEM_TABLE_NAME = "feeditem";
 
 	public RSSDatabase(Context context) {
-		super(context, "pebblerss.db", null, 4);
+		super(context, "pebblerss.db", null, 5);
 	}
 
 	@Override
@@ -65,7 +66,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feedItembuilder.append(FEEDITEM_COLUMN_PUBLICATION_DATE + " integer,");
 		feedItembuilder.append(FEEDITEM_COLUMN_URI + " text,");
 		feedItembuilder.append(FEEDITEM_COLUMN_TITLE + " text,");
-		feedItembuilder.append(FEEDITEM_COLUMN_CONTENT + " text");
+		feedItembuilder.append(FEEDITEM_COLUMN_CONTENT + " text,");
+		feedItembuilder.append(FEEDITEM_COLUMN_THUMBNAIL + " text");
 		feedItembuilder.append(")");
 		db.execSQL(feedItembuilder.toString());
 	}
@@ -84,6 +86,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_USERNAME + " text");
 			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_PASSWORD + " text");
 		}
+		if (oldVersion < 5 && newVersion > 4)
+			db.execSQL("alter table " + FEEDITEM_TABLE_NAME + " add column " + FEEDITEM_COLUMN_THUMBNAIL + " text");
 	}
 
 	public void createFeed(RSSFeed feed) {
@@ -122,6 +126,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		values.put(FEEDITEM_COLUMN_URI, item.getUri().toString());
 		values.put(FEEDITEM_COLUMN_TITLE, item.getTitle());
 		values.put(FEEDITEM_COLUMN_CONTENT, item.getContent());
+		values.put(FEEDITEM_COLUMN_THUMBNAIL, item.getThumbnail());
 
 		SQLiteDatabase db = getWritableDatabase();
 		item.setId(db.insert(FEEDITEM_TABLE_NAME, null, values));
@@ -137,6 +142,8 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
 		item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
 		item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
+		item.setThumbnail(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_THUMBNAIL)));
+
 		return item;
 	}
 

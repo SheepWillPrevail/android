@@ -1,12 +1,16 @@
 package com.grazz.pebblerss;
 
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -18,6 +22,8 @@ import com.getpebble.android.kit.PebbleKit.PebbleNackReceiver;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.grazz.pebblerss.feed.FeedCursor;
 import com.grazz.pebblerss.feed.FeedItemCursor;
+import com.grazz.pebblerss.kits.ChunkTransferKit;
+import com.grazz.pebblerss.kits.PebbleImageKit;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
 
@@ -75,6 +81,11 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		_msgQueue.add(dictionary);
 	}
 
+	private void queueData(List<PebbleDictionary> list) {
+		for (PebbleDictionary dictionary : list)
+			queueData(dictionary);
+	}
+
 	private void sendData(Context context, int retryCount) {
 		if (!_msgQueue.isEmpty() && PebbleKit.isWatchConnected(context)) {
 			PebbleDictionary dictionary = _msgQueue.remove();
@@ -87,7 +98,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	}
 
 	@Override
-	public void receiveData(Context context, int transactionId, PebbleDictionary data) {
+	public void receiveData(final Context context, int transactionId, PebbleDictionary data) {
 		Log.d("receiveData", data.toJsonString());
 		PebbleKit.sendAckToPebble(context, transactionId);
 
@@ -128,6 +139,34 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			Intent url = new Intent(Intent.ACTION_VIEW, item.getUri());
 			url.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			_service.getApplicationContext().startActivity(url);
+		}
+
+		Long thumbnail_item_id = data.getUnsignedInteger(1094);
+		if (thumbnail_item_id != null && _feedItemCursor != null) {
+			final RSSFeedItem item = _feedItemCursor.getItem(thumbnail_item_id.intValue());
+			if (item.getThumbnail() != null && item.getThumbnail().length() > 0) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							URL thumbnail = new URL(item.getThumbnail());
+							Bitmap bitmap = BitmapFactory.decodeStream(thumbnail.openStream());
+							Bitmap conformed = PebbleImageKit.conformImageToPebble(bitmap);
+							ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(conformed);
+							PebbleDictionary metadata = new PebbleDictionary();
+							metadata.addUint16(1018, (short) conformed.getWidth());
+							metadata.addUint16(1019, (short) conformed.getHeight());
+							metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(conformed.getWidth()));
+							queueData(metadata);
+							ChunkTransferKit kit = new ChunkTransferKit(buffer);
+							queueData(kit.getDictionaries());
+							sendData(context, 0);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
 		}
 	}
 
@@ -185,22 +224,12 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			e.printStackTrace();
 		}
 		if (content != null) {
-			ByteBuffer buffer = ByteBuffer.allocate(content.length);
-			buffer.put(content);
+			ByteBuffer buffer = ByteBuffer.allocate(Math.min(3024, content.length));
+			for (int i = 0; i < content.length && i < 3024; i++)
+				buffer.put(content[i]);
 			buffer.rewind();
-			int parts = (content.length > 2048 ? 2048 : content.length + (MAX_TRANSMIT_SIZE - 1)) / MAX_TRANSMIT_SIZE;
-			for (int offset = 0; offset < parts * MAX_TRANSMIT_SIZE; offset += MAX_TRANSMIT_SIZE) {
-				int length = content.length - offset;
-				if (length > MAX_TRANSMIT_SIZE)
-					length = MAX_TRANSMIT_SIZE;
-				byte[] packet = new byte[length];
-				buffer.get(packet, 0, length);
-				PebbleDictionary message_dict = new PebbleDictionary();
-				message_dict.addBytes(1003, packet);
-				message_dict.addUint8(1031, (byte) parts);
-				message_dict.addUint16(1032, (short) offset);
-				queueData(message_dict);
-			}
+			ChunkTransferKit kit = new ChunkTransferKit(buffer);
+			queueData(kit.getDictionaries());
 			sendData(context, 0);
 		}
 	}

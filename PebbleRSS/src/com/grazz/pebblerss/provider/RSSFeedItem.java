@@ -13,6 +13,7 @@ public class RSSFeedItem extends RSSDatabaseEntity {
 	private Uri _uri;
 	private String _title;
 	private String _content;
+	private String _thumbnail;
 
 	public Date getPublicationDate() {
 		return _publicationDate;
@@ -66,6 +67,14 @@ public class RSSFeedItem extends RSSDatabaseEntity {
 		List<RSSFeedItem> feedItems = db.readAllFeedItems();
 		db.close();
 		return feedItems;
+	}
+
+	public String getThumbnail() {
+		return _thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		_thumbnail = thumbnail;
 	}
 
 }

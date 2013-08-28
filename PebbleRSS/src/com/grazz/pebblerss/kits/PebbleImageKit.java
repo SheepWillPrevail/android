@@ -1,4 +1,4 @@
-package com.grazz.pebblerss.image;
+package com.grazz.pebblerss.kits;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -9,10 +9,10 @@ import android.graphics.Color;
 
 public class PebbleImageKit {
 
-	private static final int MAX_IMAGE_WIDTH = 142;
+	private static final int MAX_IMAGE_WIDTH = 144;
 	private static final int MAX_IMAGE_HEIGHT = 168;
 
-	private static int calculateBytesPerRow(int width) {
+	public static int calculateBytesPerRow(int width) {
 		int bytesPerRow = (width + 7) / 8;
 		return (bytesPerRow + 3) & ~0x03;
 	}
@@ -56,7 +56,7 @@ public class PebbleImageKit {
 				row[i] = 0;
 			for (int x = 0; x < width - 1; x++) {
 				int pixel = dither.get(x + (y * width));
-				row[x >> 3] |= (pixel < 128 ? 1 : 0) << (x % 8);
+				row[x >> 3] |= (pixel < 128 ? 0 : 1) << (x % 8);
 			}
 			bytes.put(row);
 		}
@@ -65,7 +65,7 @@ public class PebbleImageKit {
 		return bytes;
 	}
 
-	public static Bitmap ConvertBytesToBitmap(ByteBuffer source, int width, int height) {
+	public static Bitmap convertBytesToBitmap(ByteBuffer source, int width, int height) {
 		int bytesPerRow = calculateBytesPerRow(width);
 
 		if (source.remaining() < bytesPerRow * height)
@@ -76,13 +76,13 @@ public class PebbleImageKit {
 		for (int y = 0; y < height - 1; y++) {
 			source.get(row);
 			for (int x = 0; x < width - 1; x++)
-				bitmap.setPixel(x, y, ((row[x >> 3] >> (x % 8)) & 1) == 1 ? Color.BLACK : Color.WHITE);
+				bitmap.setPixel(x, y, ((row[x >> 3] >> (x % 8)) & 1) == 1 ? Color.WHITE : Color.BLACK);
 		}
 
 		return bitmap;
 	}
 
-	public static Bitmap ConformImageToPebble(Bitmap source) {
+	public static Bitmap conformImageToPebble(Bitmap source) {
 		float tempWidth = source.getWidth();
 		float tempHeight = source.getHeight();
 
@@ -96,8 +96,6 @@ public class PebbleImageKit {
 			tempHeight = MAX_IMAGE_HEIGHT;
 			tempWidth *= tempHeight / previousHeight;
 		}
-
-		System.out.println(String.format("w: %f h: %f", tempWidth, tempHeight));
 
 		return Bitmap.createScaledBitmap(source, (int) tempWidth, (int) tempHeight, true);
 	}
