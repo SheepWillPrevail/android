@@ -8,7 +8,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 
 public class ChunkTransferKit {
 
-	private final static int CHUNK_SIZE = 64;
+	private final static int CHUNK_SIZE = 88;
 	private final static int PARAM_DATA = 9999;
 	private final static int PARAM_OFFSET = 9998;
 	private final static int PARAM_LENGTH = 9997;

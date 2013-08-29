@@ -114,12 +114,22 @@
             android:text="@string/feed_unit_hours"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <CheckBox
+            android:id="@+id/cbDownloadImages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/etRetention"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/etRetention"
+            android:layout_marginTop="16dp"
+            android:text="@string/feed_download_images" />
+
         <TextView
             android:id="@+id/tvUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/etRetention"
-            android:layout_below="@+id/etRetention"
+            android:layout_alignLeft="@+id/cbDownloadImages"
+            android:layout_below="@+id/cbDownloadImages"
             android:layout_marginTop="16dp"
             android:text="@string/feed_username"
             android:textAppearance="?android:attr/textAppearanceLarge" />

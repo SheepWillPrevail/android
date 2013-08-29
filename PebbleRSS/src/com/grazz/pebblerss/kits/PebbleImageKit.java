@@ -10,7 +10,7 @@ import android.graphics.Color;
 public class PebbleImageKit {
 
 	private static final int MAX_IMAGE_WIDTH = 144;
-	private static final int MAX_IMAGE_HEIGHT = 168;
+	private static final int MAX_IMAGE_HEIGHT = 152;
 
 	public static int calculateBytesPerRow(int width) {
 		int bytesPerRow = (width + 7) / 8;
@@ -32,8 +32,8 @@ public class PebbleImageKit {
 		int bytesPerRow = calculateBytesPerRow(width);
 
 		IntBuffer dither = IntBuffer.allocate(width * height);
-		for (int y = 0; y < height - 1; y++)
-			for (int x = 0; x < width - 1; x++) {
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++) {
 				int i = x + (y * width);
 				int pixel = source.getPixel(x, y);
 				int luminance = (int) ((Color.red(pixel) * 0.3f) + (Color.green(pixel) * 0.59f) + (Color.blue(pixel) * 0.11f));
@@ -51,10 +51,10 @@ public class PebbleImageKit {
 
 		byte[] row = new byte[bytesPerRow];
 		ByteBuffer bytes = ByteBuffer.allocate(bytesPerRow * height);
-		for (int y = 0; y < height - 1; y++) {
+		for (int y = 0; y < height; y++) {
 			for (int i = 0; i < bytesPerRow; i++)
 				row[i] = 0;
-			for (int x = 0; x < width - 1; x++) {
+			for (int x = 0; x < width; x++) {
 				int pixel = dither.get(x + (y * width));
 				row[x >> 3] |= (pixel < 128 ? 0 : 1) << (x % 8);
 			}

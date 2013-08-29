@@ -43,12 +43,13 @@ public class FeedManager {
 		return null;
 	}
 
-	public RSSFeed createFeed(Uri uri, String name, int interval, int retention, String username, String password) {
+	public RSSFeed createFeed(Uri uri, String name, int interval, int retention, boolean downloadImages, String username, String password) {
 		RSSFeed feed = new RSSFeed();
 		feed.setUri(uri);
 		feed.setName(name);
 		feed.setInterval(interval);
 		feed.setRetention(retention);
+		feed.setDownloadImages(downloadImages);
 		feed.setUsername(username);
 		feed.setPassword(password);
 
@@ -115,7 +116,7 @@ public class FeedManager {
 					Node intervalNode = node.getAttributes().getNamedItem("interval");
 					if (intervalNode != null)
 						interval = intervalNode.getNodeValue();
-					createFeed(Uri.parse(link), name, Integer.valueOf(interval), 24, null, null);
+					createFeed(Uri.parse(link), name, Integer.valueOf(interval), 24, true, null, null);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

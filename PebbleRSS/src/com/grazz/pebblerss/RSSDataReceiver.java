@@ -1,6 +1,5 @@
 package com.grazz.pebblerss;
 
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -11,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -144,28 +144,20 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		Long thumbnail_item_id = data.getUnsignedInteger(1094);
 		if (thumbnail_item_id != null && _feedItemCursor != null) {
 			final RSSFeedItem item = _feedItemCursor.getItem(thumbnail_item_id.intValue());
-			if (item.getThumbnail() != null && item.getThumbnail().length() > 0) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							URL thumbnail = new URL(item.getThumbnail());
-							Bitmap bitmap = BitmapFactory.decodeStream(thumbnail.openStream());
-							Bitmap conformed = PebbleImageKit.conformImageToPebble(bitmap);
-							ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(conformed);
-							PebbleDictionary metadata = new PebbleDictionary();
-							metadata.addUint16(1018, (short) conformed.getWidth());
-							metadata.addUint16(1019, (short) conformed.getHeight());
-							metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(conformed.getWidth()));
-							queueData(metadata);
-							ChunkTransferKit kit = new ChunkTransferKit(buffer);
-							queueData(kit.getDictionaries());
-							sendData(context, 0);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}).start();
+			String thumbnail = item.getThumbnail();
+			if (thumbnail != null) {
+				byte[] decoded = Base64.decode(thumbnail, Base64.DEFAULT);
+				Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+				decoded = null;
+				ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(bitmap);
+				PebbleDictionary metadata = new PebbleDictionary();
+				metadata.addUint16(1018, (short) bitmap.getWidth());
+				metadata.addUint16(1019, (short) bitmap.getHeight());
+				metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(bitmap.getWidth()));
+				queueData(metadata);
+				ChunkTransferKit kit = new ChunkTransferKit(buffer);
+				queueData(kit.getDictionaries());
+				sendData(context, 0);
 			}
 		}
 	}
@@ -217,6 +209,9 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 
 	private void sendFeedItemText(Context context, Long item_id) {
 		RSSFeedItem item = _feedItemCursor.getItem(item_id.intValue());
+		PebbleDictionary metadata = new PebbleDictionary();
+		metadata.addUint8(1023, (byte) (item.getThumbnail() == null ? 0 : 1));
+		queueData(metadata);
 		byte[] content = null;
 		try {
 			content = item.getContent().getBytes("UTF-8");
@@ -230,6 +225,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			buffer.rewind();
 			ChunkTransferKit kit = new ChunkTransferKit(buffer);
 			queueData(kit.getDictionaries());
+			buffer = null;
 			sendData(context, 0);
 		}
 	}

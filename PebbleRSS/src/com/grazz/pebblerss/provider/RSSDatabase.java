@@ -21,6 +21,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	public static final String FEED_COLUMN_LAST_UPDATE = "last_update";
 	public static final String FEED_COLUMN_USERNAME = "username";
 	public static final String FEED_COLUMN_PASSWORD = "password";
+	public static final String FEED_COLUMN_DOWNLOAD_IMAGES = "download_images";
 
 	public static final String FEEDITEM_COLUMN_ID = "_id";
 	public static final String FEEDITEM_COLUMN_FEED_ID = "feed_id";
@@ -32,7 +33,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	public static final String FEEDITEM_COLUMN_THUMBNAIL = "thumbnail";
 
 	private static final String[] FEED_ALL_COLUMNS = new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
-			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE, FEED_COLUMN_USERNAME, FEED_COLUMN_PASSWORD };
+			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE, FEED_COLUMN_USERNAME, FEED_COLUMN_PASSWORD, FEED_COLUMN_DOWNLOAD_IMAGES };
 	private static final String[] FEEDITEM_ALL_COLUMNS = new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_FEED_ID, FEEDITEM_COLUMN_UNIQUE_ID,
 			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT, FEEDITEM_COLUMN_THUMBNAIL };
 
@@ -40,7 +41,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	private static final String FEEDITEM_TABLE_NAME = "feeditem";
 
 	public RSSDatabase(Context context) {
-		super(context, "pebblerss.db", null, 5);
+		super(context, "pebblerss.db", null, 6);
 	}
 
 	@Override
@@ -52,6 +53,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feedBuilder.append(FEED_COLUMN_NAME + " text,");
 		feedBuilder.append(FEED_COLUMN_INTERVAL + " integer,");
 		feedBuilder.append(FEED_COLUMN_RETENTION + " integer,");
+		feedBuilder.append(FEED_COLUMN_DOWNLOAD_IMAGES + " integer,");
 		feedBuilder.append(FEED_COLUMN_USERNAME + " text,");
 		feedBuilder.append(FEED_COLUMN_PASSWORD + " text,");
 		feedBuilder.append(FEED_COLUMN_LAST_UPDATE + " integer");
@@ -88,6 +90,10 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		}
 		if (oldVersion < 5 && newVersion > 4)
 			db.execSQL("alter table " + FEEDITEM_TABLE_NAME + " add column " + FEEDITEM_COLUMN_THUMBNAIL + " text");
+		if (oldVersion < 6 && newVersion > 5) {
+			db.execSQL("alter table " + FEED_TABLE_NAME + " add column " + FEED_COLUMN_DOWNLOAD_IMAGES + " integer");
+			db.execSQL("update " + FEED_TABLE_NAME + " set " + FEED_COLUMN_DOWNLOAD_IMAGES + "=1");
+		}
 	}
 
 	public void createFeed(RSSFeed feed) {
@@ -96,6 +102,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		values.put(FEED_COLUMN_NAME, feed.getName());
 		values.put(FEED_COLUMN_INTERVAL, feed.getInterval());
 		values.put(FEED_COLUMN_RETENTION, feed.getRetention());
+		values.put(FEED_COLUMN_DOWNLOAD_IMAGES, feed.shouldDownloadImages() ? 1 : 0);
 		values.put(FEED_COLUMN_USERNAME, feed.getUsername());
 		values.put(FEED_COLUMN_PASSWORD, feed.getPassword());
 		values.put(FEED_COLUMN_LAST_UPDATE, feed.getLastUpdated());
@@ -112,6 +119,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feed.setName(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_NAME)));
 		feed.setInterval(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_INTERVAL)));
 		feed.setRetention(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_RETENTION)));
+		feed.setDownloadImages(cursor.getInt(cursor.getColumnIndex(FEED_COLUMN_DOWNLOAD_IMAGES)) == 1 ? true : false);
 		feed.setUsername(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_USERNAME)));
 		feed.setPassword(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_PASSWORD)));
 		feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
@@ -170,9 +178,12 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query(FEED_TABLE_NAME, FEED_ALL_COLUMNS, null, null, null, null, FEED_COLUMN_ID + " ASC");
 
 		if (cursor != null) {
-			while (cursor.moveToNext())
-				feeds.add(cursorToFeed(cursor));
-			cursor.close();
+			try {
+				while (cursor.moveToNext())
+					feeds.add(cursorToFeed(cursor));
+			} finally {
+				cursor.close();
+			}
 		}
 
 		db.close();
@@ -186,9 +197,12 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query(FEEDITEM_TABLE_NAME, FEEDITEM_ALL_COLUMNS, null, null, null, null, FEEDITEM_COLUMN_PUBLICATION_DATE + " DESC");
 
 		if (cursor != null) {
-			while (cursor.moveToNext())
-				items.add(cursorToFeedItem(cursor));
-			cursor.close();
+			try {
+				while (cursor.moveToNext())
+					items.add(cursorToFeedItem(cursor));
+			} finally {
+				cursor.close();
+			}
 		}
 
 		db.close();
@@ -203,9 +217,12 @@ public class RSSDatabase extends SQLiteOpenHelper {
 				null, null, FEEDITEM_COLUMN_PUBLICATION_DATE + " DESC");
 
 		if (cursor != null) {
-			while (cursor.moveToNext())
-				items.add(cursorToFeedItem(cursor));
-			cursor.close();
+			try {
+				while (cursor.moveToNext())
+					items.add(cursorToFeedItem(cursor));
+			} finally {
+				cursor.close();
+			}
 		}
 
 		db.close();
@@ -218,6 +235,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		values.put(FEED_COLUMN_NAME, feed.getName());
 		values.put(FEED_COLUMN_INTERVAL, feed.getInterval());
 		values.put(FEED_COLUMN_RETENTION, feed.getRetention());
+		values.put(FEED_COLUMN_DOWNLOAD_IMAGES, feed.shouldDownloadImages());
 		values.put(FEED_COLUMN_LAST_UPDATE, feed.getLastUpdated());
 
 		SQLiteDatabase db = getWritableDatabase();
@@ -256,17 +274,20 @@ public class RSSDatabase extends SQLiteOpenHelper {
 
 		boolean wanted = true;
 		if (cursor != null) {
-			wanted = !cursor.moveToNext();
-			if (!wanted) {
-				Date foundDate = new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE)));
-				if (publicationDate.after(foundDate)) {
-					SQLiteDatabase writeDb = getWritableDatabase();
-					writeDb.delete(FEEDITEM_TABLE_NAME, query, parameters);
-					writeDb.close();
-					wanted = true;
+			try {
+				wanted = !cursor.moveToNext();
+				if (!wanted) {
+					Date foundDate = new Date(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_PUBLICATION_DATE)));
+					if (publicationDate.after(foundDate)) {
+						SQLiteDatabase writeDb = getWritableDatabase();
+						writeDb.delete(FEEDITEM_TABLE_NAME, query, parameters);
+						writeDb.close();
+						wanted = true;
+					}
 				}
+			} finally {
+				cursor.close();
 			}
-			cursor.close();
 		}
 
 		db.close();

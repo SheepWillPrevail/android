@@ -1,8 +1,12 @@
 package com.grazz.pebblerss.feed;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
@@ -12,12 +16,17 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
+import android.util.Base64;
 import android.webkit.URLUtil;
 
 import com.axelby.riasel.FeedItem;
 import com.axelby.riasel.FeedParser;
 import com.axelby.riasel.FeedParser.FeedItemHandler;
+import com.grazz.pebblerss.kits.PebbleImageKit;
 import com.grazz.pebblerss.provider.RSSDatabase;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
@@ -96,24 +105,33 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			if (URLUtil.isValidUrl(item.getLink()))
 				uri = Uri.parse(item.getLink());
 
-			RSSFeedItem feedItem = new RSSFeedItem();
+			final RSSFeedItem feedItem = new RSSFeedItem();
 			feedItem.setUniqueId(uniqueId);
 			feedItem.setPublicationDate(publicationDate);
 			feedItem.setUri(uri);
 			feedItem.setTitle(item.getTitle());
 
+			final List<String> images = new ArrayList<String>();
 			final StringBuilder filtered = new StringBuilder();
-			Jsoup.parseBodyFragment(item.getDescription()).traverse(new NodeVisitor() {
+
+			String content = item.getContent();
+			if (content == null)
+				content = item.getDescription();
+
+			Jsoup.parseBodyFragment(content).traverse(new NodeVisitor() {
 				@Override
 				public void head(Node node, int depth) {
-					if ("#text".equalsIgnoreCase(node.nodeName())) {
+					String name = node.nodeName();
+					if ("#text".equalsIgnoreCase(name)) {
 						String text = ((TextNode) node).getWholeText();
-						String name = node.parent().nodeName();
-						boolean isEmptyEntityText = ("body".equalsIgnoreCase(name) || "td".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "table"
-								.equalsIgnoreCase(name)) && text.trim().length() == 0;
+						String parent = node.parent().nodeName();
+						boolean isEmptyEntityText = ("body".equalsIgnoreCase(parent) || "td".equalsIgnoreCase(parent) || "tr".equalsIgnoreCase(parent) || "table"
+								.equalsIgnoreCase(parent)) && text.trim().length() == 0;
 						if (!isEmptyEntityText)
 							filtered.append(text.replace("\n", ""));
 					}
+					if ("img".equalsIgnoreCase(name))
+						images.add(node.attr("src"));
 				}
 
 				@Override
@@ -127,7 +145,40 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			});
 			feedItem.setContent(filtered.toString());
 
-			feedItem.setThumbnail(item.getThumbnailURL());
+			String thumbnail = item.getThumbnailURL();
+			if (thumbnail == null && images.size() > 0)
+				thumbnail = images.get(0);
+
+			final String finalThumbnail = thumbnail;
+			if (_feed.shouldDownloadImages() && finalThumbnail != null) {
+				Thread fetch = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							URL url = new URL(finalThumbnail);
+							InputStream input = url.openStream();
+							Bitmap bitmap = BitmapFactory.decodeStream(input);
+							input.close();
+							if (bitmap != null) {
+								Bitmap conformed = PebbleImageKit.conformImageToPebble(bitmap);
+								ByteArrayOutputStream output = new ByteArrayOutputStream();
+								conformed.compress(CompressFormat.PNG, 0, output);
+								conformed = null;
+								feedItem.setThumbnail(Base64.encodeToString(output.toByteArray(), Base64.DEFAULT));
+								output.close();
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				fetch.start();
+				try {
+					fetch.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 
 			_database.createFeedItem(_feed, feedItem);
 		}

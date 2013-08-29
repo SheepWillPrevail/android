@@ -19,6 +19,7 @@ public class RSSFeed extends RSSDatabaseEntity {
 	private long _lastUpdated;
 	private String _username;
 	private String _password;
+	private boolean _downloadImages;
 
 	public Uri getUri() {
 		return _uri;
@@ -117,6 +118,14 @@ public class RSSFeed extends RSSDatabaseEntity {
 
 	public void setPassword(String password) {
 		_password = password;
+	}
+
+	public boolean shouldDownloadImages() {
+		return _downloadImages;
+	}
+
+	public void setDownloadImages(boolean downloadImages) {
+		_downloadImages = downloadImages;
 	}
 
 }

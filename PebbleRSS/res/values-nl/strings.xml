@@ -27,6 +27,7 @@
     <string name="feed_title_name">Feed naam</string>
     <string name="feed_title_refresh">Ververs frequentie</string>
     <string name="feed_title_retention">Retentie periode</string>
+    <string name="feed_download_images">Afbeeldingen downloaden</string>
     <string name="feed_unit_hours">uren</string>
     <string name="feed_unit_minutes">minuten</string>
     <string name="feed_username">Gebruikersnaam</string>

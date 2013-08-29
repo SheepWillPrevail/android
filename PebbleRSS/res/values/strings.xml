@@ -71,6 +71,7 @@
     <string name="feed_title_name">Feed name</string>
     <string name="feed_title_refresh">Refresh interval</string>
     <string name="feed_title_retention">Retention period</string>
+    <string name="feed_download_images">Download images</string>
     <string name="feed_unit_hours">hours</string>
     <string name="feed_unit_minutes">minutes</string>
     <string name="feed_username">Username</string>
@@ -81,8 +82,5 @@
     <string name="menu_delete_feed">Delete</string>
     <string name="menu_install_app">Install watch app</string>
     <string name="main_item_count">items</string>
-    <string name="title_activity_dither">DitherActivity</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
 
 </resources>

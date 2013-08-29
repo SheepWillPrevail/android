@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.URLUtil;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ public class FeedActivity extends RSSServiceActivity {
 	private EditText _name;
 	private EditText _interval;
 	private EditText _retention;
+	private CheckBox _downloadImages;
 	private EditText _username;
 	private EditText _password;
 	private Button _login;
@@ -56,6 +58,7 @@ public class FeedActivity extends RSSServiceActivity {
 		_name = (EditText) findViewById(R.id.etName);
 		_interval = (EditText) findViewById(R.id.etInterval);
 		_retention = (EditText) findViewById(R.id.etRetention);
+		_downloadImages = (CheckBox) findViewById(R.id.cbDownloadImages);
 		_username = (EditText) findViewById(R.id.etUsername);
 		_password = (EditText) findViewById(R.id.etPassword);
 		_login = (Button) findViewById(R.id.bnLogin);
@@ -121,8 +124,9 @@ public class FeedActivity extends RSSServiceActivity {
 			String password = _password.getText().toString();
 			Integer interval = Integer.valueOf(intervalText);
 			Integer retention = Integer.valueOf(retentionText);
+			boolean downloadImages = _downloadImages.isChecked();
 			if (_feedAction == RSSFeed.FEED_ADD) {
-				feedManager.createFeed(uri, name, interval, retention, username, password);
+				feedManager.createFeed(uri, name, interval, retention, downloadImages, username, password);
 			} else {
 				RSSFeed feed = feedManager.getFeedById(_feedId);
 				feed.setUri(uri);
@@ -131,6 +135,7 @@ public class FeedActivity extends RSSServiceActivity {
 				feed.setRetention(retention);
 				feed.setUsername(username);
 				feed.setPassword(password);
+				feed.setDownloadImages(downloadImages);
 				feedManager.updateFeed(feed);
 			}
 			finish();
@@ -154,6 +159,7 @@ public class FeedActivity extends RSSServiceActivity {
 			_url.setSelection(_url.length());
 			_interval.setText("30");
 			_retention.setText("24");
+			_downloadImages.setChecked(true);
 			break;
 		case RSSFeed.FEED_EDIT:
 			_feedId = intent.getExtras().getLong(RSSFeed.FEED_ID);
@@ -162,6 +168,7 @@ public class FeedActivity extends RSSServiceActivity {
 			_name.setText(feed.getName());
 			_interval.setText(String.valueOf(feed.getInterval()));
 			_retention.setText(String.valueOf(feed.getRetention()));
+			_downloadImages.setChecked(feed.shouldDownloadImages());
 			String username = feed.getUsername();
 			if (username != null)
 				_username.setText(username);
