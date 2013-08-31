@@ -55,6 +55,14 @@ public class RSSFeedItem extends RSSDatabaseEntity {
 		_content = content;
 	}
 
+	public String getThumbnail() {
+		return _thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		_thumbnail = thumbnail;
+	}
+
 	public RSSFeed getFeed(Context context) {
 		RSSDatabase db = new RSSDatabase(context);
 		RSSFeed feed = db.getFeedOf(this);
@@ -69,12 +77,11 @@ public class RSSFeedItem extends RSSDatabaseEntity {
 		return feedItems;
 	}
 
-	public String getThumbnail() {
-		return _thumbnail;
-	}
-
-	public void setThumbnail(String thumbnail) {
-		_thumbnail = thumbnail;
+	public String getThumbnailData(Context context) {
+		RSSDatabase db = new RSSDatabase(context);
+		String value = db.getThumbnailData(this);
+		db.close();
+		return value;
 	}
 
 }

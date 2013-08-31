@@ -60,6 +60,8 @@ public class PebbleImageKit {
 			}
 			bytes.put(row);
 		}
+
+		dither = null;
 		bytes.rewind();
 
 		return bytes;

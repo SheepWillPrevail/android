@@ -35,7 +35,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	private static final String[] FEED_ALL_COLUMNS = new String[] { FEED_COLUMN_ID, FEED_COLUMN_URI, FEED_COLUMN_NAME, FEED_COLUMN_INTERVAL,
 			FEED_COLUMN_RETENTION, FEED_COLUMN_LAST_UPDATE, FEED_COLUMN_USERNAME, FEED_COLUMN_PASSWORD, FEED_COLUMN_DOWNLOAD_IMAGES };
 	private static final String[] FEEDITEM_ALL_COLUMNS = new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_FEED_ID, FEEDITEM_COLUMN_UNIQUE_ID,
-			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT, FEEDITEM_COLUMN_THUMBNAIL };
+			FEEDITEM_COLUMN_PUBLICATION_DATE, FEEDITEM_COLUMN_URI, FEEDITEM_COLUMN_TITLE, FEEDITEM_COLUMN_CONTENT };
 
 	private static final String FEED_TABLE_NAME = "feed";
 	private static final String FEEDITEM_TABLE_NAME = "feeditem";
@@ -123,6 +123,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		feed.setUsername(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_USERNAME)));
 		feed.setPassword(cursor.getString(cursor.getColumnIndex(FEED_COLUMN_PASSWORD)));
 		feed.setLastUpdated(cursor.getLong(cursor.getColumnIndex(FEED_COLUMN_LAST_UPDATE)));
+
 		return feed;
 	}
 
@@ -150,9 +151,28 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
 		item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
 		item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
-		item.setThumbnail(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_THUMBNAIL)));
+		// item.setThumbnail(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_THUMBNAIL)));
 
 		return item;
+	}
+
+	public String getThumbnailData(RSSFeedItem item) {
+		String value = null;
+		SQLiteDatabase db = getReadableDatabase();
+
+		Cursor cursor = db.query(FEEDITEM_TABLE_NAME, new String[] { FEEDITEM_COLUMN_ID, FEEDITEM_COLUMN_THUMBNAIL }, FEEDITEM_COLUMN_ID + "=?",
+				new String[] { String.valueOf(item.getId()) }, null, null, null);
+
+		if (cursor != null && cursor.moveToNext())
+			try {
+				value = cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_THUMBNAIL));
+			} finally {
+				cursor.close();
+			}
+
+		db.close();
+
+		return value;
 	}
 
 	public RSSFeed getFeedOf(RSSFeedItem item) {
@@ -162,9 +182,12 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		Cursor cursor = db.query(FEED_TABLE_NAME, FEED_ALL_COLUMNS, FEED_COLUMN_ID + "=?", new String[] { String.valueOf(item.getParentId()) }, null, null,
 				null);
 
-		if (cursor != null && cursor.moveToNext()) {
-			feed = cursorToFeed(cursor);
-			cursor.close();
+		try {
+			if (cursor != null && cursor.moveToNext())
+				feed = cursorToFeed(cursor);
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
 
 		db.close();
@@ -177,14 +200,13 @@ public class RSSDatabase extends SQLiteOpenHelper {
 
 		Cursor cursor = db.query(FEED_TABLE_NAME, FEED_ALL_COLUMNS, null, null, null, null, FEED_COLUMN_ID + " ASC");
 
-		if (cursor != null) {
+		if (cursor != null)
 			try {
 				while (cursor.moveToNext())
 					feeds.add(cursorToFeed(cursor));
 			} finally {
 				cursor.close();
 			}
-		}
 
 		db.close();
 		return feeds;
@@ -196,14 +218,13 @@ public class RSSDatabase extends SQLiteOpenHelper {
 
 		Cursor cursor = db.query(FEEDITEM_TABLE_NAME, FEEDITEM_ALL_COLUMNS, null, null, null, null, FEEDITEM_COLUMN_PUBLICATION_DATE + " DESC");
 
-		if (cursor != null) {
+		if (cursor != null)
 			try {
 				while (cursor.moveToNext())
 					items.add(cursorToFeedItem(cursor));
 			} finally {
 				cursor.close();
 			}
-		}
 
 		db.close();
 		return items;
@@ -247,8 +268,10 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		long expiredate = feed.getLastUpdated() - (period * 3600000);
 
 		SQLiteDatabase db = getWritableDatabase();
+		db.beginTransaction();
 		db.delete(FEEDITEM_TABLE_NAME, FEEDITEM_COLUMN_FEED_ID + "=? and " + FEEDITEM_COLUMN_PUBLICATION_DATE + "<?",
 				new String[] { String.valueOf(feed.getId()), String.valueOf(expiredate) });
+		db.endTransaction();
 		db.close();
 	}
 
@@ -292,6 +315,12 @@ public class RSSDatabase extends SQLiteOpenHelper {
 
 		db.close();
 		return wanted;
+	}
+
+	public void compactDatabase() {
+		SQLiteDatabase db = getWritableDatabase();
+		db.execSQL("vacuum");
+		db.close();
 	}
 
 }

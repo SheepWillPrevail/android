@@ -82,5 +82,6 @@
     <string name="menu_delete_feed">Delete</string>
     <string name="menu_install_app">Install watch app</string>
     <string name="main_item_count">items</string>
+    <string name="menu_compact">Compact database</string>
 
 </resources>

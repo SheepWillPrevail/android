@@ -161,6 +161,7 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 							input.close();
 							if (bitmap != null) {
 								Bitmap conformed = PebbleImageKit.conformImageToPebble(bitmap);
+								bitmap = null;
 								ByteArrayOutputStream output = new ByteArrayOutputStream();
 								conformed.compress(CompressFormat.PNG, 0, output);
 								conformed = null;

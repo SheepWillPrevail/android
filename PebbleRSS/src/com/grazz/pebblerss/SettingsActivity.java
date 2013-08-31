@@ -14,8 +14,11 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.getpebble.android.kit.PebbleKit;
 import com.grazz.pebblerss.RSSService.RSSServiceBinder;
+import com.grazz.pebblerss.provider.RSSDatabase;
 
 public class SettingsActivity extends SherlockPreferenceActivity {
 
@@ -72,6 +75,24 @@ public class SettingsActivity extends SherlockPreferenceActivity {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.settings, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_compact:
+			RSSDatabase database = new RSSDatabase(SettingsActivity.this);
+			database.compactDatabase();
+			database.close();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

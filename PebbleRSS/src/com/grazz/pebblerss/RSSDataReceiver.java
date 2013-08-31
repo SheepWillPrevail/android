@@ -68,6 +68,8 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	}
 
 	private void resetConnectionData(Context context) {
+		_feedItemCursor = null;
+		_feedCursor = null;
 		_msgQueue.clear();
 		_msgSent.clear();
 		_msgSentRetry.clear();
@@ -125,6 +127,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 
 		Long feed_id = data.getUnsignedInteger(1091);
 		if (feed_id != null && _feedCursor != null) {
+			_feedItemCursor = null;
 			_feedItemCursor = _feedCursor.getItemCursor(context, feed_id.intValue());
 			sendFeedItem(context);
 		}
@@ -144,9 +147,10 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		Long thumbnail_item_id = data.getUnsignedInteger(1094);
 		if (thumbnail_item_id != null && _feedItemCursor != null) {
 			final RSSFeedItem item = _feedItemCursor.getItem(thumbnail_item_id.intValue());
-			String thumbnail = item.getThumbnail();
+			String thumbnail = item.getThumbnailData(context);
 			if (thumbnail != null) {
 				byte[] decoded = Base64.decode(thumbnail, Base64.DEFAULT);
+				thumbnail = null;
 				Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
 				decoded = null;
 				ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(bitmap);
@@ -154,9 +158,12 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 				metadata.addUint16(1018, (short) bitmap.getWidth());
 				metadata.addUint16(1019, (short) bitmap.getHeight());
 				metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(bitmap.getWidth()));
+				bitmap = null;
 				queueData(metadata);
 				ChunkTransferKit kit = new ChunkTransferKit(buffer);
 				queueData(kit.getDictionaries());
+				kit = null;
+				buffer = null;
 				sendData(context, 0);
 			}
 		}
@@ -210,7 +217,7 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 	private void sendFeedItemText(Context context, Long item_id) {
 		RSSFeedItem item = _feedItemCursor.getItem(item_id.intValue());
 		PebbleDictionary metadata = new PebbleDictionary();
-		metadata.addUint8(1023, (byte) (item.getThumbnail() == null ? 0 : 1));
+		metadata.addUint8(1023, (byte) (item.getThumbnailData(context) == null ? 0 : 1));
 		queueData(metadata);
 		byte[] content = null;
 		try {
@@ -222,9 +229,11 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			ByteBuffer buffer = ByteBuffer.allocate(Math.min(3024, content.length));
 			for (int i = 0; i < content.length && i < 3024; i++)
 				buffer.put(content[i]);
+			content = null;
 			buffer.rewind();
 			ChunkTransferKit kit = new ChunkTransferKit(buffer);
 			queueData(kit.getDictionaries());
+			kit = null;
 			buffer = null;
 			sendData(context, 0);
 		}
