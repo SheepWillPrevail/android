@@ -271,6 +271,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		db.beginTransaction();
 		db.delete(FEEDITEM_TABLE_NAME, FEEDITEM_COLUMN_FEED_ID + "=? and " + FEEDITEM_COLUMN_PUBLICATION_DATE + "<?",
 				new String[] { String.valueOf(feed.getId()), String.valueOf(expiredate) });
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		db.close();
 	}
