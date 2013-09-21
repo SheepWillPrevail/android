@@ -58,14 +58,14 @@
     <string name="setting_title_feedfont">Feed list font</string>
     <string name="setting_title_itemfont">Feed item list font</string>
     <string name="setting_title_messagefont">Item text font</string>
-    <string name="setting_section_canvasplugin">Canvas for Pebble plugin</string>
+    <string name="setting_section_canvasplugin">Data Usage</string>
     <string name="setting_title_canvas_enabled">Background feed refresh enabled</string>
     <string name="setting_title_canvas_disabled">Background feed refresh disabled</string>
     <string name="setting_cellheight">cellheight</string>
     <string name="setting_feedfont">feedfont</string>
     <string name="setting_itemfont">itemfont</string>
     <string name="setting_messagefont">messagefont</string>
-    <string name="setting_enablecanvas">enablecanvas</string>
+    <string name="setting_backgrounddata">backgrounddata</string>
     <string name="color_feed_id">#808080</string>
     <string name="feed_title_url">URL</string>
     <string name="feed_title_name">Feed name</string>

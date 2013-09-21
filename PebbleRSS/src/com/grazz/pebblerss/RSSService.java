@@ -44,6 +44,7 @@ public class RSSService extends Service {
 		_feedManager.convertOldConfig(this);
 		PebbleKit.registerReceivedAckHandler(this, _receiver.getAckReceiver());
 		PebbleKit.registerReceivedNackHandler(this, _receiver.getNackReceiver());
+		startBackgroundRefresh();
 	}
 
 	@Override
@@ -59,10 +60,15 @@ public class RSSService extends Service {
 		if (intent != null) {
 			if (intent.hasExtra(PebbleWakeupReceiver.DATA))
 				_receiver.onReceive(this, (Intent) intent.getExtras().get(PebbleWakeupReceiver.DATA));
-			if (intent.hasExtra(CanvasRSSPlugin.PLUGINSTART) && isCanvasEnabled())
-				setCanvasEnabled(true);
+			if (intent.hasExtra(CanvasRSSPlugin.PLUGINSTART))
+				startBackgroundRefresh();
 		}
 		return super.onStartCommand(intent, flags, startId);
+	}
+
+	private void startBackgroundRefresh() {
+		if (isBackgroundRefreshEnabled())
+			setBackgroundRefreshEnabled(true);
 	}
 
 	public FeedManager getFeedManager() {
@@ -77,12 +83,12 @@ public class RSSService extends Service {
 		_receiver.sendInRefreshPacket(this);
 	}
 
-	public boolean isCanvasEnabled() {
+	public boolean isBackgroundRefreshEnabled() {
 		SharedPreferences preferences = getSharedPreferences(StaticValues.PREFERENCES_KEY, Context.MODE_PRIVATE);
-		return preferences.getBoolean(getResources().getString(R.string.setting_enablecanvas), true);
+		return preferences.getBoolean(getResources().getString(R.string.setting_backgrounddata), true);
 	}
 
-	public void setCanvasEnabled(boolean enabled) {
+	public void setBackgroundRefreshEnabled(boolean enabled) {
 		if (enabled) {
 			if (_canvasTask == null) {
 				_canvasTask = new TimerTask() {

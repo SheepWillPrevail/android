@@ -88,8 +88,17 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			queueData(dictionary);
 	}
 
+	private boolean sillyIsWatchConnected(Context context) {
+		// why a SecurityException sometimes?
+		try {
+			return PebbleKit.isWatchConnected(context);
+		} catch (SecurityException e) {
+		}
+		return false;
+	}
+
 	private void sendData(Context context, int retryCount) {
-		if (!_msgQueue.isEmpty() && PebbleKit.isWatchConnected(context)) {
+		if (!_msgQueue.isEmpty() && sillyIsWatchConnected(context)) {
 			PebbleDictionary dictionary = _msgQueue.remove();
 			_msgSent.put(_transactionId, dictionary);
 			_msgSentRetry.put(_transactionId, Integer.valueOf(retryCount));

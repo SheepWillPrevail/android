@@ -33,7 +33,7 @@
     <PreferenceCategory android:title="@string/setting_section_canvasplugin" >
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="@string/setting_enablecanvas"
+            android:key="@string/setting_backgrounddata"
             android:summaryOff="@string/setting_title_canvas_disabled"
             android:summaryOn="@string/setting_title_canvas_enabled" />
     </PreferenceCategory>

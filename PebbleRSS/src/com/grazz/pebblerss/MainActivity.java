@@ -49,7 +49,7 @@ public class MainActivity extends RSSServiceActivity {
 			setWatchAppUpdated();
 			break;
 		case ID_ACTIVITY_SETTINGS:
-			service.setCanvasEnabled(service.isCanvasEnabled());
+			service.setBackgroundRefreshEnabled(service.isBackgroundRefreshEnabled());
 			break;
 		}
 	}

@@ -22,6 +22,7 @@
     <string name="setting_title_feedfont">Lettertype feed lijst</string>
     <string name="setting_title_itemfont">Lettertype feed artikel lijst</string>
     <string name="setting_title_messagefont">Lettertype artikel tekst</string>
+    <string name="setting_section_canvasplugin">Data Gebruik</string>
     <string name="setting_title_canvas_enabled">Verversing in achtergrond ingeschakeld</string>
     <string name="setting_title_canvas_disabled">Verversing in achtergrond uitgeschakeld</string>
     <string name="feed_title_name">Feed naam</string>

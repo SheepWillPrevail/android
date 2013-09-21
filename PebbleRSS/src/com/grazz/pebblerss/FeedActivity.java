@@ -215,7 +215,7 @@ public class FeedActivity extends RSSServiceActivity {
 				public void run() {
 					final String finalUser = username.length() == 0 ? null : username;
 					final FeedProbe probe = new FeedProbe(Uri.parse(url), finalUser, password);
-					_isValidFeed = probe.isParsed() && (probe.getNumberOfItems() > 0);
+					_isValidFeed = probe.isParsed();
 					if (_isValidFeed) {
 						runOnUiThread(new Runnable() {
 							@Override
