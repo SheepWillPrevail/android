@@ -242,7 +242,7 @@ public class FeedActivity extends RSSServiceActivity {
 
 	@SuppressLint("NewApi")
 	private void tryGetShareItem(Intent intent) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			ClipData clipData = intent.getClipData();
 			if (clipData != null) {
 				Item item = clipData.getItemAt(0);
