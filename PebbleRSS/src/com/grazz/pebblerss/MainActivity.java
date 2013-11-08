@@ -32,7 +32,7 @@ public class MainActivity extends RSSServiceActivity {
 	private static final int ID_ACTIVITY_FEED = 0;
 	private static final int ID_ACTIVITY_UPDATEWATCHAPP = 1;
 	private static final int ID_ACTIVITY_SETTINGS = 2;
-	private static final String WATCHAPP_FILENAME = "pebblerss.pbw";
+	private static final String WATCHAPP_FILENAME = "pebblerss2.pbw";
 
 	private ListView _lvFeeds;
 	private FeedListAdapter _adapter;
