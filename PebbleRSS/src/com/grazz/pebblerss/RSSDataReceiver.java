@@ -243,9 +243,9 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 			ChunkTransferKit kit = new ChunkTransferKit(buffer);
 			queueData(kit.getDictionaries());
 			kit = null;
-			buffer = null;
-			sendData(context, 0);
+			buffer = null;			
 		}
+		sendData(context, 0);		
 	}
 
 	private String substring(String string, int maxLength) {
