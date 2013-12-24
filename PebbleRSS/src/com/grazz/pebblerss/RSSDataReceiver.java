@@ -154,27 +154,30 @@ public class RSSDataReceiver extends PebbleDataReceiver {
 		}
 
 		Long thumbnail_item_id = data.getUnsignedInteger(1094);
-		if (thumbnail_item_id != null && _feedItemCursor != null) {
-			final RSSFeedItem item = _feedItemCursor.getItem(thumbnail_item_id.intValue());
-			String thumbnail = item.getThumbnailData(context);
-			if (thumbnail != null) {
-				byte[] decoded = Base64.decode(thumbnail, Base64.DEFAULT);
-				thumbnail = null;
-				Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-				decoded = null;
-				ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(bitmap);
-				PebbleDictionary metadata = new PebbleDictionary();
-				metadata.addUint16(1018, (short) bitmap.getWidth());
-				metadata.addUint16(1019, (short) bitmap.getHeight());
-				metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(bitmap.getWidth()));
-				bitmap = null;
-				queueData(metadata);
-				ChunkTransferKit kit = new ChunkTransferKit(buffer);
-				queueData(kit.getDictionaries());
-				kit = null;
-				buffer = null;
-				sendData(context, 0);
-			}
+		if (thumbnail_item_id != null && _feedItemCursor != null)
+			sendImage(context, thumbnail_item_id);
+	}
+
+	private void sendImage(final Context context, Long thumbnail_item_id) {
+		final RSSFeedItem item = _feedItemCursor.getItem(thumbnail_item_id.intValue());
+		String thumbnail = item.getThumbnailData(context);
+		if (thumbnail != null) {
+			byte[] decoded = Base64.decode(thumbnail, Base64.DEFAULT);
+			thumbnail = null;
+			Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+			decoded = null;
+			ByteBuffer buffer = PebbleImageKit.convertBitmapToBytes(bitmap);
+			PebbleDictionary metadata = new PebbleDictionary();
+			metadata.addUint16(1018, (short) bitmap.getWidth());
+			metadata.addUint16(1019, (short) bitmap.getHeight());
+			metadata.addUint8(1020, (byte) PebbleImageKit.calculateBytesPerRow(bitmap.getWidth()));
+			bitmap = null;
+			queueData(metadata);
+			ChunkTransferKit kit = new ChunkTransferKit(buffer);
+			queueData(kit.getDictionaries());
+			kit = null;
+			buffer = null;
+			sendData(context, 0);
 		}
 	}
 
