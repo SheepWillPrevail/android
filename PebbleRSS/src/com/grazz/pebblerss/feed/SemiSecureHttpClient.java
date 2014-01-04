@@ -30,6 +30,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
 import android.net.Uri;
@@ -106,6 +107,8 @@ public class SemiSecureHttpClient {
 			registry.register(new Scheme("https", TrustingSSLSocketFactory.getSocketFactory(), 443));
 
 			BasicHttpParams params = new BasicHttpParams();
+			params.setParameter(CoreProtocolPNames.USER_AGENT, "PebbleRSS/1.0");
+			
 			ClientConnectionManager manager = new ThreadSafeClientConnManager(params, registry);
 			DefaultHttpClient client = new DefaultHttpClient(manager, params);
 
