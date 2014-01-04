@@ -68,11 +68,11 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 	public void run() {
 		InputStream stream = null;
 		try {
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-			factory.setNamespaceAware(true);
-			XmlPullParser pullparser = factory.newPullParser();
 			stream = new SemiSecureHttpClient(_feed.getUri(), _feed.getUsername(), _feed.getPassword()).getInputStream();
 			if (stream != null) {
+				XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+				factory.setNamespaceAware(true);
+				XmlPullParser pullparser = factory.newPullParser();
 				pullparser.setInput(stream, null);
 				FeedParser feedparser = new FeedParser();
 				feedparser.setOnFeedItemHandler(this);
