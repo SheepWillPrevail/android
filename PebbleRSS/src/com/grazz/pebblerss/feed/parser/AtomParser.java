@@ -35,7 +35,7 @@ public class AtomParser extends AbstractParser {
 				getItem().setPublicationDate(DateUtil.parseDate(parser.nextText()));
 			else if ("link".equals(name)) {
 				String link = attributes.get("href");
-				if (URLUtil.isValidUrl(link))
+				if ("text/html".equals(attributes.get("type")) && URLUtil.isValidUrl(link))
 					getItem().setLink(Uri.parse(link));
 			} else if ("content".equals(name))
 				getItem().setContent(parser.nextText());

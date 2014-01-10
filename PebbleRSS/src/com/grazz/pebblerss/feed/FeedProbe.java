@@ -20,11 +20,14 @@ public class FeedProbe {
 			stream = new ExtendedHttpClient(link, username, password).getInputStream();
 			if (stream != null) {
 				AbstractParser parser = AbstractParser.findParser(stream);
-				ParsedFeed feed = parser.getFeed();
-				if (feed != null) {
-					_isParsed = true;
-					_name = feed.getTitle();
-					_itemCount = feed.getItems().size();
+				if (parser != null) {
+					ParsedFeed feed = parser.getFeed();
+					stream.close();
+					if (feed != null) {
+						_isParsed = true;
+						_name = feed.getTitle();
+						_itemCount = feed.getItems().size();
+					}
 				}
 			}
 		} catch (Exception e) {

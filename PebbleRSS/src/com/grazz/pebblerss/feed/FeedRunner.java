@@ -36,7 +36,8 @@ public class FeedRunner implements Runnable {
 	private RSSDatabase _database;
 	private boolean _isParsed;
 
-	private final static Pattern ENTITIES = Pattern.compile("(body|td|tr|table)", Pattern.CASE_INSENSITIVE);
+	private final static Pattern ENTITIES = Pattern.compile("(body|div|p|table|td)", Pattern.CASE_INSENSITIVE);
+	private final static Pattern PADDED = Pattern.compile("(td|dd|dt)", Pattern.CASE_INSENSITIVE);
 	private final static Pattern BREAKS = Pattern.compile("(br|tr|dd|dt|h[1-6])", Pattern.CASE_INSENSITIVE);
 
 	public FeedRunner(Context context, RSSFeed feed) {
@@ -75,6 +76,7 @@ public class FeedRunner implements Runnable {
 				AbstractParser parser = AbstractParser.findParser(stream);
 				if (parser != null) {
 					ParsedFeed feed = parser.getFeed();
+					stream.close();
 					if (feed != null) {
 						for (ParsedItem item : feed.getItems())
 							processItem(item);
@@ -126,7 +128,7 @@ public class FeedRunner implements Runnable {
 						boolean isEmptyEntityText = ENTITIES.matcher(parent).matches() && text.trim().length() == 0;
 						if (!isEmptyEntityText)
 							filtered.append(text.replace("\n", ""));
-					} else if ("img".equalsIgnoreCase(name))
+					} else if ("img".equalsIgnoreCase(name) && !("1".equals(node.attr("width")) && "1".equals(node.attr("height"))))
 						images.add(node.attr("src"));
 				}
 
@@ -135,6 +137,8 @@ public class FeedRunner implements Runnable {
 					String name = node.nodeName();
 					if (BREAKS.matcher(name).matches())
 						filtered.append("\n");
+					else if (PADDED.matcher(name).matches())
+						filtered.append(" ");
 					else if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
 				}
