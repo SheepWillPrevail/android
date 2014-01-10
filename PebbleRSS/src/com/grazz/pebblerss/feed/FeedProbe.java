@@ -3,18 +3,12 @@ package com.grazz.pebblerss.feed;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import android.net.Uri;
 
-import com.axelby.riasel.Feed;
-import com.axelby.riasel.FeedItem;
-import com.axelby.riasel.FeedParser;
-import com.axelby.riasel.FeedParser.FeedInfoHandler;
-import com.axelby.riasel.FeedParser.FeedItemHandler;
+import com.grazz.pebblerss.feed.parser.AbstractParser;
+import com.grazz.pebblerss.feed.parser.ParsedFeed;
 
-public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
+public class FeedProbe {
 
 	private boolean _isParsed;
 	private String _name;
@@ -23,17 +17,15 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 	public FeedProbe(Uri link, String username, String password) {
 		InputStream stream = null;
 		try {
-			stream = new SemiSecureHttpClient(link, username, password).getInputStream();
+			stream = new ExtendedHttpClient(link, username, password).getInputStream();
 			if (stream != null) {
-				XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-				factory.setNamespaceAware(true);
-				XmlPullParser pullparser = factory.newPullParser();
-				pullparser.setInput(stream, null);
-				FeedParser feedparser = new FeedParser();
-				feedparser.setOnFeedInfoHandler(this);
-				feedparser.setOnFeedItemHandler(this);
-				feedparser.parseFeed(pullparser);
-				_isParsed = true;
+				AbstractParser parser = AbstractParser.findParser(stream);
+				ParsedFeed feed = parser.getFeed();
+				if (feed != null) {
+					_isParsed = true;
+					_name = feed.getTitle();
+					_itemCount = feed.getItems().size();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,16 +54,6 @@ public class FeedProbe implements FeedInfoHandler, FeedItemHandler {
 			return 0;
 
 		return _itemCount;
-	}
-
-	@Override
-	public void OnFeedInfo(FeedParser feedParser, Feed feed) {
-		_name = feed.getTitle();
-	}
-
-	@Override
-	public void OnFeedItem(FeedParser feedParser, FeedItem item) {
-		_itemCount++;
 	}
 
 }

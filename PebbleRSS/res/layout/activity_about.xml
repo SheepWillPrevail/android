@@ -64,14 +64,4 @@
         android:text="jsoup"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView
-        android:id="@+id/tvRiasel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvLibs"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
-        android:text="Riasel"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
 </RelativeLayout>
