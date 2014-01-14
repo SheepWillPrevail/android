@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:text="Pebble RSS © 2013 by Robert Meijer" />
+        android:text="Pebble RSS © 2013-2014 by Robert Meijer" />
 
     <TextView
         android:id="@+id/tvDonate"
