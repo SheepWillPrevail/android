@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:text="Pebble RSS © 2013 by Robert Meijer" />
+        android:text="Pebble RSS © 2013-2014 by Robert Meijer" />
 
     <TextView
         android:id="@+id/tvDonate"
@@ -62,16 +62,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:text="jsoup"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/tvRiasel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvLibs"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
-        android:text="Riasel"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

@@ -7,35 +7,38 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeVisitor;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Base64;
 import android.webkit.URLUtil;
 
-import com.axelby.riasel.FeedItem;
-import com.axelby.riasel.FeedParser;
-import com.axelby.riasel.FeedParser.FeedItemHandler;
+import com.grazz.pebblerss.feed.parser.AbstractParser;
+import com.grazz.pebblerss.feed.parser.ParsedFeed;
+import com.grazz.pebblerss.feed.parser.ParsedItem;
 import com.grazz.pebblerss.kits.PebbleImageKit;
 import com.grazz.pebblerss.provider.RSSDatabase;
 import com.grazz.pebblerss.provider.RSSFeed;
 import com.grazz.pebblerss.provider.RSSFeedItem;
 
-public class FeedRunner implements Runnable, FeedItemHandler {
+public class FeedRunner implements Runnable {
 
 	private RSSFeed _feed;
 	private RSSDatabase _database;
 	private boolean _isParsed;
+
+	private final static Pattern ENTITIES = Pattern.compile("(body|div|p|table|td)", Pattern.CASE_INSENSITIVE);
+	private final static Pattern PADDED = Pattern.compile("(td|dd|dt)", Pattern.CASE_INSENSITIVE);
+	private final static Pattern BREAKS = Pattern.compile("(br|tr|dd|dt|h[1-6])", Pattern.CASE_INSENSITIVE);
 
 	public FeedRunner(Context context, RSSFeed feed) {
 		_feed = feed;
@@ -68,16 +71,18 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 	public void run() {
 		InputStream stream = null;
 		try {
-			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-			factory.setNamespaceAware(true);
-			XmlPullParser pullparser = factory.newPullParser();
-			stream = new SemiSecureHttpClient(_feed.getUri(), _feed.getUsername(), _feed.getPassword()).getInputStream();
+			stream = new ExtendedHttpClient(_feed.getUri(), _feed.getUsername(), _feed.getPassword()).getInputStream();
 			if (stream != null) {
-				pullparser.setInput(stream, null);
-				FeedParser feedparser = new FeedParser();
-				feedparser.setOnFeedItemHandler(this);
-				feedparser.parseFeed(pullparser);
-				setIsParsed(true);
+				AbstractParser parser = AbstractParser.findParser(stream);
+				if (parser != null) {
+					ParsedFeed feed = parser.getFeed();
+					stream.close();
+					if (feed != null) {
+						for (ParsedItem item : feed.getItems())
+							processItem(item);
+						setIsParsed(true);
+					}
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,11 +95,10 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 		}
 	}
 
-	@Override
-	public void OnFeedItem(FeedParser feedParser, FeedItem item) {
-		String uniqueId = item.getUniqueId();
+	private void processItem(ParsedItem item) {
+		String uniqueId = item.getId();
 		if (uniqueId == null)
-			uniqueId = item.getLink();
+			uniqueId = item.getLink().toString();
 
 		Date publicationDate = item.getPublicationDate();
 		if (publicationDate == null)
@@ -102,8 +106,8 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 
 		if (_database.wantsFeedItem(_feed, uniqueId, publicationDate)) {
 			Uri uri = _feed.getUri();
-			if (URLUtil.isValidUrl(item.getLink()))
-				uri = Uri.parse(item.getLink());
+			if (item.getLink() != null)
+				uri = item.getLink();
 
 			final RSSFeedItem feedItem = new RSSFeedItem();
 			feedItem.setUniqueId(uniqueId);
@@ -111,43 +115,46 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 			feedItem.setUri(uri);
 			feedItem.setTitle(item.getTitle());
 
-			final List<String> images = new ArrayList<String>();
 			final StringBuilder filtered = new StringBuilder();
+			final List<String> images = new ArrayList<String>();
 
-			String content = item.getContent();
-			if (content == null)
-				content = item.getDescription();
-
-			Jsoup.parseBodyFragment(content).traverse(new NodeVisitor() {
+			Jsoup.parseBodyFragment(item.getContent()).traverse(new NodeVisitor() {
 				@Override
 				public void head(Node node, int depth) {
 					String name = node.nodeName();
 					if ("#text".equalsIgnoreCase(name)) {
 						String text = ((TextNode) node).getWholeText();
 						String parent = node.parent().nodeName();
-						boolean isEmptyEntityText = ("body".equalsIgnoreCase(parent) || "td".equalsIgnoreCase(parent) || "tr".equalsIgnoreCase(parent) || "table"
-								.equalsIgnoreCase(parent)) && text.trim().length() == 0;
+						boolean isEmptyEntityText = ENTITIES.matcher(parent).matches() && text.trim().length() == 0;
 						if (!isEmptyEntityText)
 							filtered.append(text.replace("\n", ""));
-					}
-					if ("img".equalsIgnoreCase(name))
+					} else if ("img".equalsIgnoreCase(name) && !("1".equals(node.attr("width")) && "1".equals(node.attr("height"))))
 						images.add(node.attr("src"));
 				}
 
 				@Override
 				public void tail(Node node, int depth) {
 					String name = node.nodeName();
-					if ("br".equalsIgnoreCase(name) || "tr".equalsIgnoreCase(name) || "dd".equalsIgnoreCase(name) || "dt".equalsIgnoreCase(name))
+					if (BREAKS.matcher(name).matches())
 						filtered.append("\n");
+					else if (PADDED.matcher(name).matches())
+						filtered.append(" ");
 					else if ("p".equalsIgnoreCase(name))
 						filtered.append("\n\n");
 				}
 			});
+
 			feedItem.setContent(filtered.toString());
 
-			String thumbnail = item.getThumbnailURL();
+			String thumbnail = item.getThumbnailLink() == null ? null : item.getThumbnailLink().toString();
 			if (thumbnail == null && images.size() > 0)
-				thumbnail = images.get(0);
+				for (int i = 0; i < images.size(); i++) {
+					String url = images.get(i);
+					if (URLUtil.isValidUrl(url)) {
+						thumbnail = url;
+						break;
+					}
+				}
 
 			final String finalThumbnail = thumbnail;
 			if (_feed.shouldDownloadImages() && finalThumbnail != null) {
@@ -169,7 +176,6 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 								output.close();
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
 						}
 					}
 				});
@@ -177,7 +183,6 @@ public class FeedRunner implements Runnable, FeedItemHandler {
 				try {
 					fetch.join();
 				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
 			}
 

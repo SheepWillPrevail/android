@@ -24,8 +24,8 @@ public class FeedCursor {
 
 	public int getTotal() {
 		int total = _feeds.size();
-		if (total > 32)
-			total = 32;
+		if (total > 16)
+			total = 16;
 		return total;
 	}
 

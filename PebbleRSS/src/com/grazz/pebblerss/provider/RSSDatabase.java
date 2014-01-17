@@ -97,7 +97,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	}
 
 	public void createFeed(RSSFeed feed) {
-		ContentValues values = new ContentValues();
+		ContentValues values = new ContentValues(8);
 		values.put(FEED_COLUMN_URI, feed.getUri().toString());
 		values.put(FEED_COLUMN_NAME, feed.getName());
 		values.put(FEED_COLUMN_INTERVAL, feed.getInterval());
@@ -128,7 +128,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	}
 
 	public void createFeedItem(RSSFeed feed, RSSFeedItem item) {
-		ContentValues values = new ContentValues();
+		ContentValues values = new ContentValues(7);
 		values.put(FEEDITEM_COLUMN_FEED_ID, feed.getId());
 		values.put(FEEDITEM_COLUMN_UNIQUE_ID, item.getUniqueId());
 		values.put(FEEDITEM_COLUMN_PUBLICATION_DATE, item.getPublicationDate().getTime());
@@ -144,6 +144,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 
 	private RSSFeedItem cursorToFeedItem(Cursor cursor) {
 		RSSFeedItem item = new RSSFeedItem();
+
 		item.setId(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_ID)));
 		item.setParentId(cursor.getLong(cursor.getColumnIndex(FEEDITEM_COLUMN_FEED_ID)));
 		item.setUniqueId(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_UNIQUE_ID)));
@@ -151,7 +152,6 @@ public class RSSDatabase extends SQLiteOpenHelper {
 		item.setUri(Uri.parse(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_URI))));
 		item.setTitle(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_TITLE)));
 		item.setContent(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_CONTENT)));
-		// item.setThumbnail(cursor.getString(cursor.getColumnIndex(FEEDITEM_COLUMN_THUMBNAIL)));
 
 		return item;
 	}
@@ -251,7 +251,7 @@ public class RSSDatabase extends SQLiteOpenHelper {
 	}
 
 	public void updateFeed(RSSFeed feed) {
-		ContentValues values = new ContentValues();
+		ContentValues values = new ContentValues(6);
 		values.put(FEED_COLUMN_URI, feed.getUri().toString());
 		values.put(FEED_COLUMN_NAME, feed.getName());
 		values.put(FEED_COLUMN_INTERVAL, feed.getInterval());

@@ -33,6 +33,7 @@ public class MainActivity extends RSSServiceActivity {
 	private static final int ID_ACTIVITY_UPDATEWATCHAPP = 1;
 	private static final int ID_ACTIVITY_SETTINGS = 2;
 	private static final String WATCHAPP_FILENAME = "pebblerss.pbw";
+	private static final String WATCHBETA_APP_FILENAME = "pebblerss2.pbw";
 
 	private ListView _lvFeeds;
 	private FeedListAdapter _adapter;
@@ -79,7 +80,10 @@ public class MainActivity extends RSSServiceActivity {
 			startActivityForResult(intent, ID_ACTIVITY_FEED);
 			return true;
 		case R.id.action_app:
-			sendAppToWatch();
+			sendAppToWatch(WATCHAPP_FILENAME);
+			return true;
+		case R.id.action_beta_app:
+			sendAppToWatch(WATCHBETA_APP_FILENAME);
 			return true;
 		case R.id.action_settings:
 			startActivityForResult(new Intent(this, SettingsActivity.class), ID_ACTIVITY_SETTINGS);
@@ -131,7 +135,7 @@ public class MainActivity extends RSSServiceActivity {
 			builder.setPositiveButton(resources.getString(R.string.button_positive), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					sendAppToWatch();
+					sendAppToWatch(WATCHAPP_FILENAME);
 				}
 			});
 			builder.setNegativeButton(resources.getString(R.string.button_negative), new DialogInterface.OnClickListener() {
@@ -144,10 +148,10 @@ public class MainActivity extends RSSServiceActivity {
 		}
 	}
 
-	private void sendAppToWatch() {
+	private void sendAppToWatch(String filename) {
 		try {
-			InputStream input = getAssets().open(WATCHAPP_FILENAME);
-			File file = new File(Environment.getExternalStorageDirectory(), WATCHAPP_FILENAME);
+			InputStream input = getAssets().open(filename);
+			File file = new File(Environment.getExternalStorageDirectory(), filename);
 			file.setReadable(true, false);
 			OutputStream output = new FileOutputStream(file);
 			try {
