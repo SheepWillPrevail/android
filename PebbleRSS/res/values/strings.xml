@@ -83,6 +83,6 @@
     <string name="menu_install_app">Install watch app</string>
     <string name="main_item_count">items</string>
     <string name="menu_compact">Compact database</string>
-    <string name="menu_beta_app">Install watch app (2.0-BETA5)</string>
+    <string name="menu_beta_app">Install beta watch app</string>
 
 </resources>

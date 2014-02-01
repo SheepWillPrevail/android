@@ -32,8 +32,7 @@ public class MainActivity extends RSSServiceActivity {
 	private static final int ID_ACTIVITY_FEED = 0;
 	private static final int ID_ACTIVITY_UPDATEWATCHAPP = 1;
 	private static final int ID_ACTIVITY_SETTINGS = 2;
-	private static final String WATCHAPP_FILENAME = "pebblerss.pbw";
-	private static final String WATCHBETA_APP_FILENAME = "pebblerss2.pbw";
+	private static final String WATCHAPP_FILENAME = "pebblerss2.pbw";
 
 	private ListView _lvFeeds;
 	private FeedListAdapter _adapter;
@@ -81,9 +80,6 @@ public class MainActivity extends RSSServiceActivity {
 			return true;
 		case R.id.action_app:
 			sendAppToWatch(WATCHAPP_FILENAME);
-			return true;
-		case R.id.action_beta_app:
-			sendAppToWatch(WATCHBETA_APP_FILENAME);
 			return true;
 		case R.id.action_settings:
 			startActivityForResult(new Intent(this, SettingsActivity.class), ID_ACTIVITY_SETTINGS);

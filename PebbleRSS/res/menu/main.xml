@@ -7,9 +7,9 @@
     <item
         android:id="@+id/action_app"
         android:title="@string/menu_install_app"/>
-    <item
+    <!-- <item
         android:id="@+id/action_beta_app"
-        android:title="@string/menu_beta_app"/>    
+        android:title="@string/menu_beta_app"/> -->    
     <item
         android:id="@+id/action_settings"
         android:title="@string/title_activity_settings"/>
